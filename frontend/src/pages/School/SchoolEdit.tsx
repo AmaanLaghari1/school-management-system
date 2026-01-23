@@ -1,9 +1,10 @@
 import { useState } from "react"
 import * as Yup from 'yup'
-import {updateSchool} from '../../api/SchoolRequest'
+import { updateSchool } from '../../api/SchoolRequest'
 import Alert from "../../components/custom/Alert"
 import SchoolForm from "./SchoolForm"
 import { useLocation, useNavigate } from "react-router"
+import AlertConfirm from "../../components/custom/AlertConfirm"
 
 const SchoolEdit = () => {
     const [loading, setLoading] = useState(false)
@@ -12,7 +13,7 @@ const SchoolEdit = () => {
 
     const navigate = useNavigate()
 
-    const {prevValues} = location.state || {}
+    const { prevValues } = location.state || {}
 
     const initialValues = {
         school_id: prevValues.SCHOOL_ID || '',
@@ -26,7 +27,7 @@ const SchoolEdit = () => {
 
     const validationSchema = Yup.object().shape({
         school_name: Yup.string().required('Required!'),
-        email: Yup.string().required('Required!'),
+        email: Yup.string().email('Invalid email!'),
         branch: Yup.string().required('Required!'),
         contact_no_1: Yup.string().required('Required!'),
         address: Yup.string().required('Required!')
@@ -38,11 +39,11 @@ const SchoolEdit = () => {
         try {
             const response = await updateSchool(values, prevValues.SCHOOL_ID)
             // console.log(response)
-            Alert({status: true, text: "School updated successfully..."})
+            Alert({ status: true, text: "School updated successfully..." })
             navigate('/schools')
         } catch (error) {
             console.log(error)
-            Alert({status: false, text: "Unable to update the school!"})
+            Alert({ status: false, text: "Unable to update the school!" })
         }
         setLoading(false)
     }
@@ -52,10 +53,18 @@ const SchoolEdit = () => {
             <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">Edit School</h5>
 
             <SchoolForm
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            handleSubmit={handleSubmit}
-            loading={loading}
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                handleSubmit={async (values) => {
+                    const confirm = await AlertConfirm({
+                        title: "Are you sure?",
+                        text: "You won't be able to revert this!",
+                    })
+                    if (confirm) {
+                        handleSubmit(values)
+                    }
+                }}
+                loading={loading}
             />
         </div>
     )

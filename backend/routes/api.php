@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\FeeCategoryController;
 use App\Http\Controllers\API\SchoolController;
 use App\Http\Controllers\API\StandardController;
 use App\Http\Controllers\API\SessionController;
@@ -75,4 +76,16 @@ Route::prefix('enrolment')->group(function () {
     Route::post('add', [EnrolmentController::class, 'store']);
     Route::put('edit/{id}', [EnrolmentController::class, 'update']);
     Route::delete('delete/{id}', [EnrolmentController::class, 'destroy']);
+    Route::post('promote', [EnrolmentController::class, 'promoteClass']);
+    Route::post('toggle-active', [EnrolmentController::class, 'toggleActiveStatus']);
+});
+
+Route::prefix('fee')->group(function () {
+    Route::prefix('category')->group(function () {
+        Route::get('get', [FeeCategoryController::class, 'index']);
+        Route::get('get/{id}', [FeeCategoryController::class, 'show']);
+        Route::post('post', [FeeCategoryController::class, 'store']);
+        Route::post('put', [FeeCategoryController::class, 'update']);
+        Route::post('delete', [FeeCategoryController::class, 'destroy']);
+    });
 });

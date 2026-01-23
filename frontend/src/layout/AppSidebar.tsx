@@ -17,6 +17,7 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+import RoleSwitcher from "../components/custom/RoleSwitcher";
 
 type NavItem = {
   name: string;
@@ -33,12 +34,12 @@ const navItems: NavItem[] = [
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
   
-  {
-    icon: <GridIcon />,
-    name: "Schools",
-    path: "/schools"
-    // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
+  // {
+  //   icon: <GridIcon />,
+  //   name: "Schools",
+  //   path: "/schools"
+  //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+  // },
   
   {
     icon: <GridIcon />,
@@ -47,25 +48,43 @@ const navItems: NavItem[] = [
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
   
-  {
-    icon: <GridIcon />,
-    name: "Sessions",
-    path: "/sessions"
-    // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
+  // {
+  //   icon: <GridIcon />,
+  //   name: "Sessions",
+  //   path: "/sessions"
+  //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+  // },
   
-  {
-    icon: <GridIcon />,
-    name: "Standards",
-    path: "/standards"
-    // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
+  // {
+  //   icon: <GridIcon />,
+  //   name: "Standards",
+  //   path: "/standards"
+  //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+  // },
   
   {
     icon: <GridIcon />,
     name: "Enrolments",
     path: "/enrolments"
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+  },
+  
+  {
+    icon: <GridIcon />,
+    name: "Setup",
+    path: "",
+    subItems: [
+      { name: "Schools", path: "/schools", pro: false },
+      { name: "Sessions", path: "/sessions", pro: false },
+      { name: "Standards", path: "/standards", pro: false }
+    ],
+  },
+  
+  {
+    icon: <GridIcon />,
+    name: "Fee Management",
+    path: "/fee",
+    subItems: [{ name: "Categories", path: "/fee/categories", pro: false }],
   },
 
   // {
@@ -368,6 +387,7 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
+      <RoleSwitcher />
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">

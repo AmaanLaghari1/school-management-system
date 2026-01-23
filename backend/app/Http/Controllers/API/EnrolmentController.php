@@ -43,7 +43,7 @@ class EnrolmentController extends Controller
                 'session_id' => 'required',
                 'student_id' => 'required',
                 'standard_id' => 'required',
-                'detail' => 'required'
+//                'detail' => 'required'
             ])->stopOnFirstFailure();
 
             if($validation->fails()){
@@ -79,7 +79,6 @@ class EnrolmentController extends Controller
                 'session_id' => 'required',
                 'student_id' => 'required',
                 'standard_id' => 'required',
-                'detail' => 'required'
             ])->stopOnFirstFailure();
 
             if($validation->fails()){
@@ -161,4 +160,86 @@ class EnrolmentController extends Controller
             return response()->json(['error_message' => $e->getMessage()], 500);
         }
     }
+
+    public function promoteClass(Request $request){
+        try {
+            // Validate the incoming request
+            $validation = Validator::make($request->all(), [
+                'school_id' => 'required',
+                'standard_id' => 'required',
+                'previous_standard_id' => 'required',
+                'session_id' => 'required',
+                'previous_session_id' => 'required',
+            ])->stopOnFirstFailure();
+
+            if($validation->fails()){
+                return response()->json([
+                    'error_message' => $validation->errors()->first()
+                ], 403);
+            }
+
+            // Fetch students from previous class session
+            $records = Enrolment::where('STANDARD_ID', $request->previous_standard_id)
+                ->where('SESSION_ID', $request->previous_session_id)
+                ->where('ACTIVE', 1)   // Only active enrolments
+                    ->orderBy('YEAR', 'DESC')
+                ->get();
+
+            if ($records->isEmpty()) {
+                return response()->json([
+                    'error_message' => 'No active students found to promote.'
+                ], 404);
+            }
+
+            DB::beginTransaction();
+            foreach ($records as $record) {
+
+                // Deactivate the previous record
+                $record->ACTIVE = 0;
+                $record->save();
+
+                // Create a NEW enrolment record for promoted class
+                Enrolment::create([
+                    'STUDENT_ID' => $record->STUDENT_ID,
+                    'STANDARD_ID' => $request->standard_id,
+                    'SESSION_ID' => $request->session_id,
+                    'DETAIL', $request->detail??'',
+                    'REMARKS' => $request->remarks ?? '',
+                    'ACTIVE' => 1,  // new record becomes active
+                ]);
+            }
+            DB::commit();
+            return response()->json([
+                'message' => 'Students promoted successfully.',
+                'total_students_promoted' => $records->count()
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error_message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function toggleActiveStatus(Request $request){
+        try {
+            $record = Enrolment::find($request->enrolment_id);
+
+            DB::beginTransaction();
+            $record->update([ 'ACTIVE' => $request->active]);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Enrolment status updated successfully.',
+            ], 200);
+        }
+        catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+               'error_message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

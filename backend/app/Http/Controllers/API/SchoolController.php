@@ -28,7 +28,7 @@ class SchoolController extends Controller
                 'school_name' => 'required',
                 'branch' => 'required',
                 'address' => 'required',
-                'email' => 'required|email',
+                'email' => 'email',
                 'contact_no_1' => 'required',
             ])->stopOnFirstFailure();
 
@@ -65,7 +65,7 @@ class SchoolController extends Controller
                 'school_name' => 'required',
                 'branch' => 'required',
                 'address' => 'required',
-                'email' => 'required|email',
+                'email' => 'email',
                 'contact_no_1' => 'required',
             ])->stopOnFirstFailure();
 

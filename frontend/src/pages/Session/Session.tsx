@@ -4,9 +4,12 @@ import DataTable, { Column } from "../../components/custom/DataTable";
 import { Link, useNavigate } from "react-router";
 import Button from "../../components/ui/button/Button";
 import Alert from "../../components/custom/Alert";
+import AlertConfirm from "../../components/custom/AlertConfirm";
+import { useUser } from "../../hooks/useUser";
 
 interface Session {
     SESSION_ID: string;
+    SCHOOL_ID: string;
     SESSION_NAME: string;
     YEAR: string;
     ACTIVE: string;
@@ -18,13 +21,15 @@ const Session = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [sessions, setSessions] = useState<Session[]>([])
     const navigate = useNavigate()
+    // const user = useSelector((state: any) => state.auth.authData.user)
+    const {user} = useUser()
 
     const fetchSessions = async () => {
         setLoading(true)
         try {
             const response = await API.getSession()
             // console.log(response)
-            setSessions(response.data)
+            setSessions(response.data.filter((item: any) => item.SCHOOL_ID === user.SCHOOL_ID))
         } catch (error) {
             console.log(error)
         }
@@ -76,7 +81,18 @@ const Session = () => {
                             }}
                         >Edit</button>
                         {/* Optional: Add delete or other actions here */}
-                        <button disabled={loading} onClick={() => handleDelete(row.SESSION_ID)} className="text-red-600 hover:underline text-sm">Delete</button>
+                        <button disabled={loading} 
+                        onClick={async () => {
+                            const confirm = await AlertConfirm({
+                                title: 'Are you sure?',
+                                text: 'Do you really want to delete this session? This process cannot be undone.',
+                            })
+                            if(confirm){
+                                handleDelete(row.SESSION_ID)
+                            }
+                        }
+                        } 
+                        className="text-red-600 hover:underline text-sm">Delete</button>
                     </div>
                 )
             }

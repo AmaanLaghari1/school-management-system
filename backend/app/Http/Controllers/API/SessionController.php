@@ -13,7 +13,7 @@ class SessionController extends Controller
     //
     public function index(){
         try {
-            $records = Session::all();
+            $records = Session::orderBy('YEAR', 'DESC')->get();
             return response()->json($records, 200);
         }
         catch (\Exception $e) {
@@ -37,6 +37,7 @@ class SessionController extends Controller
     public function store(Request $request){
         try {
             $validation = Validator::make($request->all(), [
+                'school_id' => 'required',
                 'session_name' => 'required',
                 'year' => 'required',
             ])->stopOnFirstFailure();
@@ -48,6 +49,7 @@ class SessionController extends Controller
             }
 
             $data = [
+                'SCHOOL_ID' => $request->school_id,
                 'SESSION_NAME' => $request->session_name,
                 'YEAR' => $request->year,
                 'REMARKS' => $request->remarks ?? ''

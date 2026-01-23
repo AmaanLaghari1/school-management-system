@@ -1,8 +1,11 @@
+import MainHeading from "../../components/custom/MainHeading";
 
 export default function Home() {
   return (
     <>
-      <h1>Welcome</h1>
+      <MainHeading>
+        Dashboard
+      </MainHeading>
     </>
   );
 }

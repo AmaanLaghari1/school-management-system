@@ -39,7 +39,6 @@ class StandardController extends Controller
             $validation = Validator::make($request->all(), [
                 'school_id' => 'required',
                 'standard_name' => 'required',
-                'section' => 'required',
             ])->stopOnFirstFailure();
 
             if($validation->fails()){
@@ -51,7 +50,7 @@ class StandardController extends Controller
             $data = [
                 "SCHOOL_ID" => $request->school_id,
                 "STANDARD_NAME" => $request->standard_name,
-                "SECTION" => $request->section,
+                "SECTION" => $request->section??'',
                 "REMARKS" => $request->remarks ?? ''
             ];
 
@@ -78,7 +77,6 @@ class StandardController extends Controller
             $validation = Validator::make($request->all(), [
                 'school_id' => 'required',
                 'standard_name' => 'required',
-                'section' => 'required',
             ])->stopOnFirstFailure();
 
             if($validation->fails()){
@@ -90,7 +88,7 @@ class StandardController extends Controller
             $data = [
                 "SCHOOL_ID" => $request->school_id,
                 "STANDARD_NAME" => $request->standard_name,
-                "SECTION" => $request->section,
+                "SECTION" => $request->section??'',
                 "REMARKS" => $request->remarks ?? ''
             ];
 

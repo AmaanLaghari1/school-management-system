@@ -30,6 +30,8 @@ export const login = (formdata: {}) => {
 
             if(response.data){
                 dispatch({type: "AUTH_SUCCESS", payload: response.data})
+                dispatch({type: "SET_ROLES", payload: response.data.user.roles})
+                dispatch({type: "SWITCH_ROLE", payload: response.data.user.role[0].ROLE_NAME})
             }
         } catch (error: any) {
             console.log(error)

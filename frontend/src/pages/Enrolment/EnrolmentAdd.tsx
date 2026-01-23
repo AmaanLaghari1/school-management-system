@@ -4,6 +4,8 @@ import * as Yup from 'yup'
 import EnrolmentForm from "./EnrolmentForm"
 import * as API from '../../api/EnrolmentRequest'
 import Alert from "../../components/custom/Alert"
+import { FormikHelpers } from "formik"
+import AlertConfirm from "../../components/custom/AlertConfirm"
 
 const EnrolmentAdd = () => {
     const [loading, setLoading] = useState(false)
@@ -19,19 +21,24 @@ const EnrolmentAdd = () => {
         student_id: Yup.string().required('Required!'),
         session_id: Yup.string().required('Required!'),
         standard_id: Yup.string().required('Required!'),
-        detail: Yup.string().required('Required!')
     })
 
-    const handleSubmit = async (values: {}) => {
+    const handleSubmit = async (values: {}, {resetForm}: FormikHelpers<any>) => {
         setLoading(true)
         try {
-            const response = await API.createEnrolment(values)
-            Alert({status: true, text: response.data.message || 'Enrolment created...'})
+            const confirm = AlertConfirm({})
+            if(await confirm){
+                const response = await API.createEnrolment(values)
+                Alert({status: true, text: response.data.message || 'Enrolment created...'})
+                resetForm()
+            }
         } catch (error: any) {
             console.log(error)
-            Alert({status: true, text: error.data.error_message || 'Enrolment creation failed!'})
+            Alert({status: false, text: error?.error_message || 'Enrolment creation failed!'})
         }
-        setLoading(false)
+        finally {
+            setLoading(false)
+        }
     }
   return (
     <div>

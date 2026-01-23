@@ -14,6 +14,7 @@ class Session extends Model
     protected $primaryKey = 'SESSION_ID';
 
     protected $fillable = [
+        'SCHOOL_ID',
         'SESSION_NAME',
         'YEAR',
         'ACTIVE',

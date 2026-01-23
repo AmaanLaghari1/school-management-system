@@ -57,9 +57,10 @@ class StudentController extends Controller
                 'guardian_relation_id' => 'required',
                 'school_id' => 'required',
                 'name' => 'required',
-                'email' => 'required',
-                'cnic_no' => 'required|unique:students',
-                'date_of_birth' => 'required',
+                'fname' => 'required',
+//                'email' => 'email|nullable|unique:students,email',
+//                'cnic_no' => 'required|unique:students',
+//                'date_of_birth' => 'required',
             ])->stopOnFirstFailure();
 
             if($validation->fails()){
@@ -119,9 +120,9 @@ class StudentController extends Controller
                 'school_id' => 'required',
                 'guardian_relation_id' => 'required',
                 'name' => 'required',
-                'email' => 'required',
+//                'email' => 'email|nullable|unique:students,email',
                 'cnic_no' => 'required',
-                'date_of_birth' => 'required',
+//                'date_of_birth' => 'required',
             ])->stopOnFirstFailure();
 
             if($validation->fails()){

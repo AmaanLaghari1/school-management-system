@@ -1,4 +1,4 @@
-import { Form, Formik } from "formik"
+import { Form, Formik, FormikHelpers } from "formik"
 import Input from "../../components/form/input/InputField"
 import { FC } from "react";
 import * as Yup from 'yup'
@@ -8,7 +8,10 @@ import { BoxIcon } from "lucide-react";
 interface FormProps {
     initialValues: { [key: string]: any };
     validationSchema: Yup.AnySchema;
-    handleSubmit: (values: any) => void | Promise<void>;
+    handleSubmit: (
+            values: any,
+            helpers: FormikHelpers<any>
+        ) => void | Promise<void>; 
     loading: boolean;
 }
 

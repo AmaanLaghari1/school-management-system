@@ -1,32 +1,44 @@
 import axios from "axios";
 
-const API = axios.create({baseURL: import.meta.env.VITE_API_URL+'/enrolment'})
+const API = axios.create({ baseURL: import.meta.env.VITE_API_URL + '/enrolment' })
 
-export const createEnrolment = (formdata: {}) =>  API.post('/add', formdata, {
+export const createEnrolment = (formdata: {}) => API.post('/add', formdata, {
     headers: {
         "Content-Type": "application/json"
     }
 })
 
-export const updateEnrolment = (formdata: {}, id: '') =>  API.put('/edit/'+id, formdata, {
+export const updateEnrolment = (formdata: {}, id: '') => API.put('/edit/' + id, formdata, {
     headers: {
         "Content-Type": "application/json"
     }
 })
 
-export const getEnrolment = (formdata: {}) =>  API.post('/get', formdata, {
+export const getEnrolment = (formdata: {}) => API.post('/get', formdata, {
     headers: {
         "Content-Type": "application/json"
     }
 })
 
-export const getEnrolmentById = (id: '') =>  API.get('/get/'+id, {
+export const getEnrolmentById = (id: '') => API.get('/get/' + id, {
     headers: {
         "Content-Type": "application/json"
     }
 })
 
-export const deleteEnrolment = (id: '') =>  API.delete('/delete/'+id, {
+export const deleteEnrolment = (id: '') => API.delete('/delete/' + id, {
+    headers: {
+        "Content-Type": "application/json"
+    }
+})
+
+export const promoteStudents = (formdata: {}) => API.post('/promote', formdata, {
+    headers: {
+        "Content-Type": "application/json"
+    }
+})
+
+export const toggleActive = (formdata: {}) => API.post('/toggle-active', formdata, {
     headers: {
         "Content-Type": "application/json"
     }

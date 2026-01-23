@@ -3,6 +3,8 @@ import StudentForm from "./StudentForm"
 import * as Yup from 'yup'
 import { createStudent } from "../../api/StudentRequest"
 import Alert from "../../components/custom/Alert"
+import { FormikHelpers } from "formik"
+import AlertConfirm from "../../components/custom/AlertConfirm"
 
 const StudentAdd = () => {
     const [loading, setLoading] = useState(false)
@@ -25,6 +27,7 @@ const StudentAdd = () => {
         guardian_mobile_no: '',
         guardian_email: '',
         guardian_address: '',
+        previous_school: '',
         previous_standard: '',
         previous_gr_no: '',
         current_gr_no: '',
@@ -41,11 +44,11 @@ const StudentAdd = () => {
         fname: Yup.string().required('Required!'),
         surname: Yup.string().required('Required!'),
         mobile_no: Yup.number().required('Required!'),
-        date_of_birth: Yup.string().required('Required!'),
+        // date_of_birth: Yup.string().required('Required!'),
         postal_address: Yup.string().required('Required!'),
         permanent_address: Yup.string().required('Required!'),
-        email: Yup.string().email('Invalid Email!').required('Required!'),
-        guardian_email: Yup.string().email('Invalid Email!').required('Required!'),
+        email: Yup.string().email('Invalid email!'),
+        guardian_email: Yup.string().email('Invalid email!'),
         gender: Yup.string().required('Required!'),
         cnic_no: Yup.number().min(1111111111111, 'Invalid CNIC No!').required('Required!'),
         guardian_cnic_no: Yup.number().min(1111111111111, 'Invalid CNIC No!').required('Required!'),
@@ -54,12 +57,12 @@ const StudentAdd = () => {
         guardian_address: Yup.string().required('Required!'),
     })
 
-    const handleSubmit = async (values: {}) => { 
+    const handleSubmit = async (values: any, {resetForm}: FormikHelpers<any>) => { 
         setLoading(true)
         try {
             const response = await createStudent(values)
-            console.log(response)
             Alert({status: true, text: response.data?.message || 'Student created successfully...'})
+            resetForm();
         } catch (error: any) {
             console.log(error)
             Alert({status: false, text: error.response.data?.error_message || 'Some error occured!'})
@@ -73,9 +76,18 @@ const StudentAdd = () => {
             <StudentForm
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                handleSubmit={handleSubmit}
+                handleSubmit={async (values, helpers) => {
+                    const confirm = await AlertConfirm({
+                        title: "Are you sure?",
+                        text: "You won't be able to revert this!",
+                    })
+                    if (confirm) {
+                        handleSubmit(values, helpers)
+                    }
+                }}
                 loading={loading}
             />
+            
         </div>
     )
 }

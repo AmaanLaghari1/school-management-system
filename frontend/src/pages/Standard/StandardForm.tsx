@@ -1,4 +1,4 @@
-import { Form, Formik } from "formik"
+import { Form, Formik, FormikHelpers } from "formik"
 import Input from "../../components/form/input/InputField"
 import { FC, useEffect, useMemo, useState } from "react";
 import * as Yup from 'yup'
@@ -11,7 +11,10 @@ import { mapOptions } from "../../helpers/helper";
 interface FormProps {
     initialValues: { [key: string]: any };
     validationSchema: Yup.AnySchema;
-    handleSubmit: (values: any) => void | Promise<void>;
+    handleSubmit: (
+        values: any,
+        helpers: FormikHelpers<any>
+    ) => void | Promise<void>;
     loading: boolean;
 }
 
@@ -40,7 +43,7 @@ const StandardForm: FC<FormProps> = ({ initialValues, validationSchema, handleSu
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleSubmit}
+                onSubmit={(values, helpers) => handleSubmit(values, helpers)}
             >
                 {
                     () => <Form>

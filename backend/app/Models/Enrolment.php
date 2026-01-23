@@ -39,7 +39,7 @@ class Enrolment extends Model
     }
 
     public function session(){
-        return $this->belongsTo(Session::class, 'SESSION_ID');
+        return $this->belongsTo(Session::class, 'SESSION_ID')->orderBy('YEAR', 'DESC');
     }
 
     public function standard(){

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { deleteSchool, getSchool } from "../../api/SchoolRequest";
 import DataTable, { Column } from "../../components/custom/DataTable";
 import Button from "../../components/ui/button/Button";
@@ -9,6 +9,8 @@ import { mapOptions } from "../../helpers/helper";
 import { Formik, Form } from "formik";
 import * as Yup from 'yup'
 import Select from "../../components/form/Select";
+import AlertConfirm from "../../components/custom/AlertConfirm";
+import { useUser } from "../../hooks/useUser";
 
 interface Student {
   STUDENT_ID: string;
@@ -26,12 +28,13 @@ const Student = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [schools, setSchools] = useState<[]>([])
   const navigate = useNavigate()
+  const {user} = useUser();
 
   const fetchSchools = async () => {
     try {
       const response = await getSchool()
-      console.log(response)
-      setSchools(response.data)
+      // console.log(response)
+      setSchools(response.data.filter((school: any) => school.SCHOOL_ID === user.SCHOOL_ID));
     } catch (error: any) {
       console.log(error)
     }
@@ -93,7 +96,16 @@ const Student = () => {
             }}
           >Edit</button>
           {/* Optional: Add delete or other actions here */}
-          <button onClick={() => handleDelete(row.STUDENT_ID)} className="text-red-600 hover:underline text-sm">Delete</button>
+          <button onClick={
+            async () => {
+              const confirm = await AlertConfirm({
+                title: 'Are you sure?',
+                text: 'Do you really want to delete this student? This process cannot be undone.',})
+                if(confirm){
+                  handleDelete(row.STUDENT_ID)
+                }
+            }
+          } className="text-red-600 hover:underline text-sm">Delete</button>
         </div>
       ),
     },
@@ -103,7 +115,7 @@ const Student = () => {
     <div className="space-y-6">
       <Formik
         initialValues={{
-          'school_id': ''
+          'school_id': user.SCHOOL_ID || ''
         }}
         validationSchema={Yup.object().shape({
           school_id: Yup.string().required('Please select school!')
@@ -113,8 +125,14 @@ const Student = () => {
         }}
       >
         {
-          ({ }) => (
-            <Form>
+          ({ submitForm, setFieldValue, validateForm, values }) => {
+            useEffect(() => {
+              if (values.school_id) {
+                submitForm();
+              }
+            }, []);
+
+            return <Form>
               <div className="flex items-end">
                 <div className="w-md mx-2">
                   <Select
@@ -122,26 +140,20 @@ const Student = () => {
                     label="Select School"
                     options={schoolOptions}
                     required={true}
-                  />
-                </div>
+                    onChange={async (e) => {
+                      await setFieldValue("school_id", e);
 
-                <div className="">
-                  <Button
-                    size="sm"
-                    variant="success"
-                    className=" my-auto self-end"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {
-                      loading ? 'Fetching Students...' : 'Search'
-                    }
-                  </Button>
+                      const errors = await validateForm();
+                      if (Object.keys(errors).length === 0) {
+                        submitForm();
+                      }
+                    }}
+                  />
                 </div>
 
               </div>
             </Form>
-          )
+          }
         }
 
       </Formik>
@@ -158,7 +170,6 @@ const Student = () => {
           </div>
 
           <div style={{ width: '100%', overflow: "hidden" }}>
-
             <DataTable data={students} columns={columns} itemsPerPage={10} />
           </div>
         </>

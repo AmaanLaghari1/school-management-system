@@ -3,14 +3,17 @@ import StudentForm from "./StudentForm"
 import * as Yup from 'yup'
 import { updateStudent } from "../../api/StudentRequest"
 import Alert from "../../components/custom/Alert"
-import { useLocation } from "react-router"
+import { useLocation, useNavigate } from "react-router"
+import AlertConfirm from "../../components/custom/AlertConfirm"
 
 const StudentEdit = () => {
     const [loading, setLoading] = useState(false)
 
     const location = useLocation()
 
-    const {prevValues} = location.state || {}
+    const navigate = useNavigate()
+
+    const { prevValues } = location.state || {}
 
     const initialValues = {
         school_id: prevValues.SCHOOL_ID || '',
@@ -31,6 +34,7 @@ const StudentEdit = () => {
         guardian_email: prevValues.GUARDIAN_EMAIL || '',
         guardian_address: prevValues.GUARDIAN_ADDRESS || '',
         previous_standard: prevValues.PREVIOUS_STANDARD || '',
+        previous_school: prevValues.PREVIOUS_SCHOOL || '',
         previous_gr_no: prevValues.PREVIOUS_GR_NO || '',
         current_gr_no: prevValues.CURRENT_GR_NO || '',
         tuition_fee: prevValues.TUITION_FEE || '',
@@ -46,11 +50,11 @@ const StudentEdit = () => {
         fname: Yup.string().required('Required!'),
         surname: Yup.string().required('Required!'),
         mobile_no: Yup.number().required('Required!'),
-        date_of_birth: Yup.string().required('Required!'),
+        // date_of_birth: Yup.string().required('Required!'),
         postal_address: Yup.string().required('Required!'),
         permanent_address: Yup.string().required('Required!'),
-        email: Yup.string().email('Invalid Email!').required('Required!'),
-        guardian_email: Yup.string().email('Invalid Email!').required('Required!'),
+        email: Yup.string().email('Invalid email!'),
+        guardian_email: Yup.string().email('Invalid email!'),
         gender: Yup.string().required('Required!'),
         cnic_no: Yup.number().min(1111111111111, 'Invalid CNIC No!').required('Required!'),
         guardian_cnic_no: Yup.number().min(1111111111111, 'Invalid CNIC No!').required('Required!'),
@@ -59,15 +63,17 @@ const StudentEdit = () => {
         guardian_address: Yup.string().required('Required!'),
     })
 
-    const handleSubmit = async (values: {}) => { 
+
+    const handleSubmit = async (values: {}) => {
         setLoading(true)
         try {
             const response = await updateStudent(values, prevValues.STUDENT_ID)
-            console.log(response)
-            Alert({status: true, text: response.data?.message || 'Student created successfully...'})
+            // console.log(response)
+            Alert({ status: true, text: response.data?.message || 'Student created successfully...' })
+            navigate('/students')
         } catch (error: any) {
             console.log(error)
-            Alert({status: false, text: error.response.data?.error_message || 'Some error occured!'})
+            Alert({ status: false, text: error.response.data?.error_message || 'Some error occured!' })
         }
         setLoading(false)
     }
@@ -78,7 +84,15 @@ const StudentEdit = () => {
             <StudentForm
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                handleSubmit={handleSubmit}
+                handleSubmit={async (values) => {
+                    const confirm = await AlertConfirm({
+                        title: "Are you sure?",
+                        text: "You won't be able to revert this!",
+                    })
+                    if (confirm) {
+                        handleSubmit(values)
+                    }
+                }}
                 loading={loading}
             />
         </div>

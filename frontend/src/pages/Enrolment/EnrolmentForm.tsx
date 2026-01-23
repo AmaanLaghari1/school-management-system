@@ -1,21 +1,26 @@
-import { Form, Formik } from "formik";
+import { Form, Formik, FormikHelpers } from "formik";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
 import { BoxIcon } from "lucide-react";
 import * as Yup from "yup";
 import { FC, useEffect, useMemo, useState } from "react";
 import Select from "../../components/form/Select";
-import { getStudent } from "../../api/StudentRequest";
+import { getStudent, getStudentBySchoolId } from "../../api/StudentRequest";
 import { getSession } from "../../api/SessionRequest";
-import { getStandard } from "../../api/StandardRequest";
+import { getStandard, getStandardBySchoolId } from "../../api/StandardRequest";
 import { mapOptions } from "../../helpers/helper";
+import { getSchool } from "../../api/SchoolRequest";
 
 // Define props interface
 interface FormProps {
     initialValues: { [key: string]: any };
     validationSchema: Yup.AnySchema;
-    handleSubmit: (values: any) => void | Promise<void>;
+    handleSubmit: (
+        values: any,
+        helpers: FormikHelpers<any>
+    ) => void | Promise<void>;
     loading: boolean;
+    disableFields?: { [key: string]: boolean };
 }
 
 const EnrolmentForm: FC<FormProps> = ({
@@ -24,6 +29,8 @@ const EnrolmentForm: FC<FormProps> = ({
     handleSubmit,
     loading,
 }) => {
+
+    const [schools, setSchools] = useState<[]>([])
     const [students, setStudents] = useState<[]>([])
     const [standards, setStandards] = useState<[]>([])
     const [sessions, setSessions] = useState<[]>([])
@@ -45,8 +52,49 @@ const EnrolmentForm: FC<FormProps> = ({
         }
     };
 
+    const fetchSchools = async () => {
+        try {
+            const response = await getSchool()
+            setSchools(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchSessions = async () => {
+        try {
+            const response = await getSession()
+            setSessions(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const schoolOptions = useMemo(() => {
+        return mapOptions(schools, 'SCHOOL_NAME', 'SCHOOL_ID')
+    }, [schools])
+
+    const fetchStudents = async (schoolId: any) => {
+        try {
+            const response = await getStudentBySchoolId(schoolId)
+            setStudents(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchStandards = async (schoolId: any) => {
+        try {
+            const response = await getStandardBySchoolId(schoolId)
+            setStandards(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
-        fetchData()
+        fetchSchools()
+        fetchSessions()
     }, [])
 
     const studentOptions = useMemo(() => {
@@ -54,8 +102,11 @@ const EnrolmentForm: FC<FormProps> = ({
     }, [students])
 
     const standardOptions = useMemo(() => {
-        return mapOptions(standards, 'STANDARD_NAME', 'STANDARD_ID') || []
-    }, [standards])
+        return standards?.map((item: any) => ({
+            label: item.SECTION ? `${item.STANDARD_NAME} (${item.SECTION})` : item.STANDARD_NAME,
+            value: item.STANDARD_ID
+        })) || [];
+    }, [standards]);
 
     const sessionOptions = useMemo(() => {
         return mapOptions(sessions, 'SESSION_NAME', 'SESSION_ID') || []
@@ -66,41 +117,64 @@ const EnrolmentForm: FC<FormProps> = ({
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleSubmit}
+                onSubmit={(values, helpers) => handleSubmit(values, helpers)}
+                enableReinitialize={true}
             >
-                {() => (
-                    <Form>
-                        <Select
-                            label="Student"
-                            name="student_id"
-                            options={studentOptions}
-                            required={true}
-                        />
-                        <Select
-                            label="Session"
-                            name="session_id"
-                            options={sessionOptions}
-                            required={true}
-                        />
-                        <Select
-                            label="Standard"
-                            name="standard_id"
-                            options={standardOptions}
-                            required={true}
-                        />
-                        <Input
-                            name="detail"
-                            type="text"
-                            placeholder="Enter detail"
-                            label="Detail"
-                            required
-                        />
-                        <Input
-                            name="remarks"
-                            type="text"
-                            placeholder="Enter remarks"
-                            label="Remarks"
-                        />
+                {({ setFieldValue, values }) => {
+                    useEffect(() => {
+                        if (values.school_id) {
+                            fetchStudents(values.school_id);
+                            fetchStandards(values.school_id);
+                        }
+                    }, []);
+
+                    return <Form>
+                        <div className="grid sm:grid-cols-2 gap-2">
+
+                            <Select
+                                label="School"
+                                name="school_id"
+                                options={schoolOptions}
+                                onChange={(e) => {
+                                    setFieldValue('school_id', e)
+                                    fetchStudents(e)
+                                    fetchStandards(e)
+                                }}
+                                required={true}
+                                disabled={values.school_id ? true : false}
+                            />
+                            <Select
+                                label="Student"
+                                name="student_id"
+                                options={studentOptions}
+                                required={true}
+                                disabled={values.student_id ? true : false}
+                            />
+                            <Select
+                                label="Session"
+                                name="session_id"
+                                options={sessionOptions}
+                                required={true}
+                            />
+                            <Select
+                                label="Standard"
+                                name="standard_id"
+                                options={standardOptions}
+                                required={true}
+                            />
+                            <Input
+                                name="detail"
+                                type="text"
+                                placeholder="Enter detail"
+                                label="Detail"
+                            />
+                            <Input
+                                name="remarks"
+                                type="text"
+                                placeholder="Enter remarks"
+                                label="Remarks"
+                            />
+                        </div>
 
                         <Button
                             size="sm"
@@ -113,7 +187,8 @@ const EnrolmentForm: FC<FormProps> = ({
                             {loading ? "Saving..." : "Save"}
                         </Button>
                     </Form>
-                )}
+                }
+                }
             </Formik>
         </div>
     );

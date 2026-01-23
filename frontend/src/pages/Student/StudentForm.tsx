@@ -1,4 +1,4 @@
-import { ErrorMessage, Form, Formik } from "formik"
+import { ErrorMessage, Form, Formik, FormikHelpers } from "formik"
 import Input from "../../components/form/input/InputField"
 import * as Yup from 'yup'
 import { FC, useEffect, useMemo, useState } from "react"
@@ -15,7 +15,10 @@ import { getGuardianRelation } from "../../api/StudentRequest";
 interface FormProps {
     initialValues: { [key: string]: any };
     validationSchema: Yup.AnySchema;
-    handleSubmit: (values: any) => void | Promise<void>;
+    handleSubmit: (
+        values: any,
+        helpers: FormikHelpers<any>
+    ) => void | Promise<void>; 
     loading: boolean;
 }
 
@@ -65,7 +68,7 @@ const StudentForm: FC<FormProps> = ({
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleSubmit}
+                onSubmit={(values, helpers) => handleSubmit(values, helpers)}
             >
                 {
                     () => (
@@ -145,7 +148,6 @@ const StudentForm: FC<FormProps> = ({
                                         type="text"
                                         placeholder="Enter email address"
                                         label="Email"
-                                        required
                                     />
                                 </div>
                             </div>
@@ -227,7 +229,6 @@ const StudentForm: FC<FormProps> = ({
                                         type="text"
                                         placeholder="Enter guardian email address"
                                         label="Email"
-                                        required
                                     />
                                 </div>
                                 <div className="mb-1 mx-1">
@@ -270,8 +271,16 @@ const StudentForm: FC<FormProps> = ({
 
                             <div className="grid sm:grid-cols-2">
                                 <div className="mb-1 mx-1">
+                                    <Input
+                                        name="previous_school"
+                                        type="text"
+                                        placeholder="Enter previous school name"
+                                        label="Previous School"
+                                    />
+                                </div>
+                                <div className="mb-1 mx-1">
                                     <Select
-                                        label="School"
+                                        label="Current School"
                                         name="school_id"
                                         options={schoolOptions}
                                         required={true}

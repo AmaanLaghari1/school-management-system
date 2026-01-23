@@ -16,7 +16,7 @@ interface SelectProps {
   hint?: string;
   disabled?: boolean;
   required?: boolean;
-  onChange?: (value: string) => void; // ✅ new optional prop
+  onChange?: (value: string) => void;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -28,7 +28,7 @@ const Select: React.FC<SelectProps> = ({
   disabled = false,
   required = false,
   hint,
-  onChange, // ✅ destructure it here
+  onChange,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
@@ -70,7 +70,7 @@ const Select: React.FC<SelectProps> = ({
                 value={
                   open
                     ? searchTerm
-                    : options.find((o) => o.value === field.value)?.label || ""
+                    : options.find((o) => o.value == field.value)?.label || ""
                 }
                 onFocus={() => setOpen(true)}
                 onChange={(e) => {

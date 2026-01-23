@@ -4,12 +4,18 @@ import SessionForm from "./SessionForm"
 import { createSession } from "../../api/SessionRequest"
 import Alert from "../../components/custom/Alert"
 import { useNavigate } from "react-router"
+import AlertConfirm from "../../components/custom/AlertConfirm"
+import { FormikHelpers } from "formik"
+import { useUser } from "../../hooks/useUser"
 
 const SessionAdd = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const navigate = useNavigate()
 
+    const {user} = useUser()
+
     const initialValues = {
+        school_id: user.SCHOOL_ID || '',
         session_name: '',
         year: '',
         active: '',
@@ -21,32 +27,41 @@ const SessionAdd = () => {
         year: Yup.string().required('Required'),
     })
 
-    const handleSubmit = async (values: {}) => {
+    const handleSubmit = async (values: {}, { resetForm }: FormikHelpers<any>) => {
         setLoading(true)
         try {
             const response = await createSession(values)
             // console.log(response)
-            Alert({status: true, text: response.data.message || 'Session added successfully...'})
+            Alert({ status: true, text: response.data.message || 'Session added successfully...' })
             navigate('/sessions')
         } catch (error: any) {
             console.log(error)
-            Alert({status: false, text: error.data?.error_message || 'Error adding session!'})
+            Alert({ status: false, text: error.data?.error_message || 'Error adding session!' })
         }
+        resetForm()
         setLoading(false)
 
     }
-  return (
-    <div>
-        <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">Add New Session</h5>
+    return (
+        <div>
+            <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">Add New Session</h5>
 
             <SessionForm
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            handleSubmit={handleSubmit}
-            loading={loading}
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                handleSubmit={async (values, helpers) => {
+                    const confirm = await AlertConfirm({
+                        title: "Are you sure?",
+                        text: "You won't be able to revert this!",
+                    })
+                    if (confirm) {
+                        handleSubmit(values, helpers)
+                    }
+                }}
+                loading={loading}
             />
-    </div>
-  )
+        </div>
+    )
 }
 
 export default SessionAdd

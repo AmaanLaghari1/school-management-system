@@ -47,7 +47,6 @@ const SchoolForm: FC<FormProps> = ({
                             type="email"
                             placeholder="Enter email"
                             label="Email"
-                            required
                         />
                         <Input
                             name="contact_no_1"
