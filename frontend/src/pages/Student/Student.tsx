@@ -73,7 +73,7 @@ const Student = () => {
   }, []);
 
   const columns: Column<Student>[] = [
-    { key: "STUDENT_ID", header: "ID", sortable: true },
+    // { key: "STUDENT_ID", header: "ID", sortable: true },
     { key: "NAME", header: "Name", sortable: true },
     { key: "FNAME", header: "Father's Name", sortable: true },
     { key: "SURNAME", header: "Surname", sortable: true },

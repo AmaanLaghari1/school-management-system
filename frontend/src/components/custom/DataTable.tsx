@@ -102,6 +102,7 @@ const DataTable = <T extends object>({
         <table className="min-w-full text-sm sm:text-base divide-y divide-gray-200 dark:divide-gray-600">
           <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
+              <th className="p-3">#</th>
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -131,6 +132,7 @@ const DataTable = <T extends object>({
                   key={rowIndex}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
+                  <td align="center">{rowIndex+1}</td>
                   {columns.map((column) => (
                     <td
                       key={column.key}

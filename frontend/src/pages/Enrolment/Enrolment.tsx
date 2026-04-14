@@ -140,7 +140,7 @@ const Enrolment = () => {
 
     // Table columns
     const columns: Column<Enrolment>[] = [
-        { key: 'ENROLMENT_ID', header: 'ID', sortable: true },
+        // { key: 'ENROLMENT_ID', header: 'ID', sortable: true },
         { key: 'student.NAME', header: 'Student Name', sortable: true },
         { key: 'DETAIL', header: 'Detail', sortable: true },
         {   

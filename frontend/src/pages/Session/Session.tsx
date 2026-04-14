@@ -50,11 +50,11 @@ const Session = () => {
     }
 
     const columns: Column<Session>[] = [
-        {
-            key: 'SESSION_ID',
-            header: 'ID',
-            sortable: true
-        },
+        // {
+        //     key: 'SESSION_ID',
+        //     header: 'ID',
+        //     sortable: true
+        // },
         {
             key: 'SESSION_NAME',
             header: 'Session Name',

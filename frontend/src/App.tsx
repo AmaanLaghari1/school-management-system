@@ -23,6 +23,7 @@ import EnrolmentAdd from "./pages/Enrolment/EnrolmentAdd";
 import EnrolmentEdit from "./pages/Enrolment/EnrolmentEdit";
 import PromoteClass from "./pages/Enrolment/PromoteClass";
 import FeeCategory from "./pages/FeeManagement/FeeCategory/FeeCategory";
+import FeeList from "./pages/FeeManagement/FeeList/FeeList";
 
 export default function App() {
   const auth = useSelector((state:any) => state.auth?.authData)
@@ -30,7 +31,7 @@ export default function App() {
   // console.log(auth)
 
   const roles = useSelector((state:any) => state.roles?.allRoles)
-  console.log(roles)
+  // console.log(roles)
 
   return (
     <>
@@ -57,6 +58,7 @@ export default function App() {
             <Route index path="/enrolment/edit" element={<EnrolmentEdit />} />
             <Route index path="/enrolment/promote/class" element={<PromoteClass />} />
             <Route index path="/fee/categories" element={<FeeCategory />} />
+            <Route index path="/fee/lists" element={<FeeList />} />
           </Route>
 
           {/* Auth Layout */}

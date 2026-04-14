@@ -45,7 +45,7 @@ const SchoolPage = () => {
   }, []);
 
   const columns: Column<School>[] = [
-    { key: "SCHOOL_ID", header: "ID", sortable: true  },
+    // { key: "SCHOOL_ID", header: "ID", sortable: true  },
     { key: "SCHOOL_NAME", header: "School Name", sortable: true  },
     { key: "BRANCH", header: "Branch", sortable: true  },
     { key: "EMAIL", header: "Email", sortable: true  },

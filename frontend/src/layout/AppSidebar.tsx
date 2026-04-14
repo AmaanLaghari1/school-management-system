@@ -84,8 +84,11 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Fee Management",
     path: "/fee",
-    subItems: [{ name: "Categories", path: "/fee/categories", pro: false }],
-  },
+    subItems: [
+      { name: "Categories", path: "/fee/categories", pro: false },
+      { name: "Fee Lists", path: "/fee/lists", pro: false }
+    ],
+  }
 
   // {
   //   icon: <CalenderIcon />,

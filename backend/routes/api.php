@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\FeeCategoryController;
+use App\Http\Controllers\API\FeeListController;
 use App\Http\Controllers\API\SchoolController;
 use App\Http\Controllers\API\StandardController;
 use App\Http\Controllers\API\SessionController;
@@ -87,5 +88,13 @@ Route::prefix('fee')->group(function () {
         Route::post('post', [FeeCategoryController::class, 'store']);
         Route::post('put', [FeeCategoryController::class, 'update']);
         Route::post('delete', [FeeCategoryController::class, 'destroy']);
+    });
+
+    Route::prefix('fee_list')->group(function () {
+        Route::get('get', [FeeListController::class, 'index']);
+        Route::get('get/{id}', [FeeListController::class, 'show']);
+        Route::post('post', [FeeListController::class, 'store']);
+        Route::post('put', [FeeListController::class, 'update']);
+        Route::post('delete', [FeeListController::class, 'destroy']);
     });
 });

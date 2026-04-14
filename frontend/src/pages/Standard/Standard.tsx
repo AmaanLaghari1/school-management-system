@@ -71,11 +71,11 @@ const Standard = () => {
     }, [])
 
     const columns: Column<Standard>[] = [
-        {
-            key: 'STANDARD_ID',
-            header: 'ID',
-            sortable: true
-        },
+        // {
+        //     key: 'STANDARD_ID',
+        //     header: 'ID',
+        //     sortable: true
+        // },
         {
             key: 'school.SCHOOL_NAME',
             header: 'School Name',

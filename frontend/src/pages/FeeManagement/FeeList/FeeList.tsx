@@ -1,87 +1,125 @@
 import { useEffect, useState } from "react"
-import * as API from '../../../api/FeeCategory'
+import * as API from '../../../api/FeeList'
 import DataTable, { Column } from "../../../components/custom/DataTable";
 import Button from "../../../components/ui/button/Button";
-import Alert from "../../../components/custom/Alert";
 import AlertConfirm from "../../../components/custom/AlertConfirm";
-import FeeCategoryAdd from "./FeeCategoryAdd";
-import FeeCategoryEdit from "./FeeCategoryEdit";
 import { useModal } from "../../../hooks/useModal";
 import Switch from "../../../components/form/switch/Switch";
+import FeeListAdd from "./FeeListAdd";
+import FeeListEdit from "./FeeListEdit";
+import Alert from "../../../components/custom/Alert";
 
-interface FeeCategory {
+interface FeeListItem {
+    FEE_ID: string;
     FEE_CAT_ID: string;
-    CAT_TITLE: string;
+    SESSION_ID: string;
+    STANDARD_ID: string;
+    TITLE: string;
+    AMOUNT: string;
     REMARKS: string;
     ACTIVE: boolean;
 }
-
-const FeeCategory = () => {
+const FeeList = () => {
     const [loading, setLoading] = useState<boolean>(false)
-    const [categories, setCategories] = useState<FeeCategory[]>([])
+    const [feelist, setFeelist] = useState<FeeListItem[]>([])
     const [prevValues, setPrevValues] = useState({})
     const addModal = useModal(false);
     const editModal = useModal(false);
 
-    const fetchCategory = async () => {
+    const fetchFeelist = async () => {
         setLoading(true)
         try {
-            const response = await API.getFeeCategory()
+            const response = await API.getFeeList()
             // console.log(response)
-            setCategories(response.data)
+            setFeelist(response.data)
         } catch (error) {
             console.log(error)
         }
         setLoading(false)
     }
 
-    const handleDelete = async (id: '') => {
-        setLoading(true)
-        try {
-            const response = await API.deleteFeeCategory({ fee_cat_id: id })
-            Alert({ status: true, text: response.data?.message || 'Category deleted...' })
-            setCategories(categories.filter(item => item.FEE_CAT_ID != id))
-        } catch (error: any) {
-            console.log(error)
-            Alert({ status: false, text: error.data?.error_message || 'Unable to delete the session' })
-        }
-        setLoading(false)
-    }
+    useEffect(() => {
+        fetchFeelist()
+    }, [])
 
     const toggleActive = async (values: {}) => {
         try {
-            const response = await API.updateFeeCategory(values)
-            fetchCategory()
-        } catch (error:any) {
+            const response = await API.updateFeeList(values)
+        }
+        catch (error: any) {
             console.log(error)
         }
     }
 
-    const columns: Column<FeeCategory>[] = [
+    const handleDelete = async (id: string) => {
+        try {
+            const formData = new FormData()
+            formData.append('fee_id', id)
+            const response = await API.deleteFeeList(formData)
+            Alert({
+                status: true,
+                text: 'Fee list deleted successfully...',
+            })
+            setFeelist(feelist.filter(item => item.FEE_ID !== id)) // Update the list after deletion
+        }
+        catch (error: any) {
+            console.log(error)
+            Alert({
+                status: false,
+                text: 'Something went wrong! Please try again.',
+            })
+        }
+    }
+
+    const columns: Column<FeeListItem>[] = [
+        // {
+        //     key: 'FEE_ID',
+        //     header: 'ID',
+        //     sortable: true
+        // },
         {
-            key: 'FEE_CAT_ID',
-            header: 'ID',
+            key: 'session.SESSION_NAME',
+            header: 'Session',
             sortable: true
         },
         {
-            key: 'CAT_TITLE',
+            key: 'standard.STANDARD_NAME',
+            header: 'Standard',
+            sortable: true
+        },
+        {
+            key: 'fee_category.CAT_TITLE',
+            header: 'Category',
+            sortable: true
+        },
+        {
+            key: 'TITLE',
             header: 'Title',
+            sortable: true
+        },
+        {
+            key: 'AMOUNT',
+            header: 'Amount',
             sortable: true
         },
         {
             key: 'ACTIVE',
             header: 'Active',
             sortable: true,
-            render: (row:any) => {
+            render: (row: any) => {
                 return (
                     <div>
-                        <Switch label="" defaultChecked={row.ACTIVE == 1} 
-                        onChange={() => toggleActive({
-                            fee_cat_id: row.FEE_CAT_ID,
-                            remarks: row.REMARKS,
-                            cat_title: row.CAT_TITLE,
-                            active: row.ACTIVE == 1 ? 0 : 1
-                        })}
+                        <Switch label="" defaultChecked={row.ACTIVE == 1}
+                            onChange={() => toggleActive({
+                                fee_id: row.FEE_ID,
+                                session_id: row.SESSION_ID,
+                                standard_id: row.STANDARD_ID,
+                                fee_cat_id: row.FEE_CAT_ID,
+                                title: row.TITLE,
+                                amount: row.AMOUNT,
+                                remarks: row.REMARKS,
+                                active: row.ACTIVE == 1 ? 0 : 1
+                            })}
                         />
                     </div>
                 )
@@ -115,7 +153,7 @@ const FeeCategory = () => {
                                 })
 
                                 if (confirm) {
-                                    handleDelete(row.FEE_CAT_ID)
+                                    handleDelete(row.FEE_ID)
                                 }
                             }}
                         >
@@ -134,27 +172,26 @@ const FeeCategory = () => {
         },
     ]
 
-    useEffect(() => {
-        fetchCategory()
-    }, [])
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">All Fee Categories</h2>
+                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">Feelist</h2>
                 <Button size="sm" variant="primary"
-                onClick={() => addModal.openModal()}
+                    onClick={() => addModal.openModal()}
                 >
                     Add New +
                 </Button>
             </div>
 
-            <DataTable data={categories} columns={columns} itemsPerPage={10} />
+            <DataTable data={feelist} columns={columns} itemsPerPage={10} />
 
             {
                 addModal.isOpen &&
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} />
+                        {/* <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} /> */}
+                        <FeeListAdd closeModal={addModal.closeModal} fetchData={fetchFeelist} />
                         <div className="flex justify-end gap-2 mt-4">
                             <Button variant="secondary" onClick={() => addModal.closeModal()}>
                                 Cancel
@@ -168,7 +205,7 @@ const FeeCategory = () => {
                 editModal.isOpen &&
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeCategoryEdit fetchData={fetchCategory} closeModal={editModal.closeModal} prevValues={prevValues} />
+                        <FeeListEdit fetchData={fetchFeelist} closeModal={editModal.closeModal} prevValues={prevValues} />
                         <div className="flex justify-end gap-2 mt-4">
                             <Button variant="secondary" onClick={() => editModal.closeModal()}>
                                 Cancel
@@ -178,8 +215,7 @@ const FeeCategory = () => {
                 </div>
             }
         </div>
-
     )
 }
 
-export default FeeCategory
+export default FeeList
