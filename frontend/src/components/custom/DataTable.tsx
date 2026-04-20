@@ -148,7 +148,7 @@ const DataTable = <T extends object>({
             ) : (
               <tr>
                 <td
-                  colSpan={columns.length}
+                  colSpan={columns.length+1}
                   className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
                 >
                   No data found.

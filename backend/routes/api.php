@@ -3,6 +3,8 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\FeeCategoryController;
 use App\Http\Controllers\API\FeeListController;
+use App\Http\Controllers\API\FeeLedgerController;
+use App\Http\Controllers\API\FeeVoucherController;
 use App\Http\Controllers\API\SchoolController;
 use App\Http\Controllers\API\StandardController;
 use App\Http\Controllers\API\SessionController;
@@ -43,6 +45,7 @@ Route::prefix('session')->group(function () {
     Route::post('add', [SessionController::class, 'store']);
     Route::put('edit/{id}', [SessionController::class, 'update']);
     Route::delete('delete/{id}', [SessionController::class, 'destroy']);
+    Route::get('get_by_school/{schoolId}', [SessionController::class, 'getSessionBySchoolId']);
 });
 
 Route::prefix('student')->group(function () {
@@ -79,6 +82,7 @@ Route::prefix('enrolment')->group(function () {
     Route::delete('delete/{id}', [EnrolmentController::class, 'destroy']);
     Route::post('promote', [EnrolmentController::class, 'promoteClass']);
     Route::post('toggle-active', [EnrolmentController::class, 'toggleActiveStatus']);
+    Route::get('get_by_school/{schoolId}', [EnrolmentController::class, 'getEnrolmentBySchoolId']);
 });
 
 Route::prefix('fee')->group(function () {
@@ -96,5 +100,22 @@ Route::prefix('fee')->group(function () {
         Route::post('post', [FeeListController::class, 'store']);
         Route::post('put', [FeeListController::class, 'update']);
         Route::post('delete', [FeeListController::class, 'destroy']);
+    });
+
+    Route::prefix('fee_ledger')->group(function () {
+        Route::get('get', [FeeLedgerController::class, 'index']);
+        Route::get('get/{id}', [FeeLedgerController::class, 'show']);
+        Route::post('post', [FeeLedgerController::class, 'store']);
+        Route::post('put', [FeeLedgerController::class, 'update']);
+        Route::post('delete', [FeeLedgerController::class, 'destroy']);
+    });
+
+    Route::prefix('fee_voucher')->group(function () {
+        Route::get('get', [FeeVoucherController::class, 'index']);
+        Route::get('get/{id}', [FeeVoucherController::class, 'show']);
+        Route::get('get_by_school/{schoolId}', [FeeVoucherController::class, 'getBySchoolId']);;
+        Route::post('post', [FeeVoucherController::class, 'store']);
+        Route::post('put', [FeeVoucherController::class, 'update']);
+        Route::post('delete', [FeeVoucherController::class, 'destroy']);
     });
 });

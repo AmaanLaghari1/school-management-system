@@ -7,6 +7,7 @@ interface InputProps {
   name: string;
   type?: "text" | "number" | "email" | "password" | "date" | "time" | string;
   placeholder?: string;
+  value?: string;
   className?: string;
   min?: string;
   max?: string;
@@ -22,6 +23,7 @@ const Input: React.FC<InputProps> = ({
   type = "text",
   placeholder,
   className = "",
+  value,
   min,
   max,
   step,

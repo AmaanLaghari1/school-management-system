@@ -23,7 +23,7 @@ const Radio: React.FC<RadioProps> = ({
   const isChecked = field.checked;
 
   return (
-    <>
+    <div className="">
     <label
       htmlFor={id}
       className={`relative flex cursor-pointer select-none items-center gap-3 text-sm font-medium ${
@@ -59,7 +59,7 @@ const Radio: React.FC<RadioProps> = ({
       {label}
     </label>
 
-    </>
+    </div>
   );
 };
 

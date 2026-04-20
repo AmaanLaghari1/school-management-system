@@ -3,8 +3,16 @@ import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import UserAddressCard from "../components/UserProfile/UserAddressCard";
 import PageMeta from "../components/common/PageMeta";
+import { useSelector } from "react-redux";
 
 export default function UserProfiles() {
+  const auth = useSelector((state:any) => state.auth?.authData)
+  const role = useSelector((state:any) => state.roles?.selectedRole)
+  const data = {
+    ROLE: role,
+    ...auth?.user,
+  }
+  // console.log(auth)
   return (
     <>
       <PageMeta
@@ -17,9 +25,9 @@ export default function UserProfiles() {
           Profile
         </h3>
         <div className="space-y-6">
-          <UserMetaCard />
-          <UserInfoCard />
-          <UserAddressCard />
+          <UserMetaCard data={data} />
+          <UserInfoCard data={data} />
+          <UserAddressCard data={data} />
         </div>
       </div>
     </>

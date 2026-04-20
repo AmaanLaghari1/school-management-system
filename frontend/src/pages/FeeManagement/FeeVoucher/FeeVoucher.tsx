@@ -1,38 +1,39 @@
-import { useEffect, useState } from "react"
-import * as API from '../../../api/FeeList'
-import DataTable, { Column } from "../../../components/custom/DataTable";
-import Button from "../../../components/ui/button/Button";
-import AlertConfirm from "../../../components/custom/AlertConfirm";
-import { useModal } from "../../../hooks/useModal";
-import Switch from "../../../components/form/switch/Switch";
-import FeeListAdd from "./FeeListAdd";
-import FeeListEdit from "./FeeListEdit";
-import Alert from "../../../components/custom/Alert";
+import React, { useEffect, useState } from 'react'
+import { useModal } from '../../../hooks/useModal';
+import * as API from '../../../api/FeeVoucher.ts'
+import Alert from '../../../components/custom/Alert';
+import DataTable, { Column } from '../../../components/custom/DataTable.tsx';
+import AlertConfirm from '../../../components/custom/AlertConfirm';
+import Button from '../../../components/ui/button/Button.tsx';
+import FeeVoucherAdd from './FeeVoucherAdd.tsx';
+import Switch from '../../../components/form/switch/Switch.tsx';
+import FeeVoucherEdit from './FeeVoucherEdit.tsx';
 
-interface FeeListItem {
-    FEE_ID: string;
-    FEE_CAT_ID: string;
-    SESSION_ID: string;
-    STANDARD_ID: string;
-    TITLE: string;
-    AMOUNT: string;
+interface FeeVoucherItem {
+    VOUCHER_ID: string;
+    SCHOOL_ID: string;
+    ENROLMENT_ID: string;
+    DATE: string;
+    DETAIL: string;
+    FEE_MONTH: string;
+    TOTAL_AMOUNT: string;
+    ACTIVE: string;
     REMARKS: string;
-    ACTIVE: boolean;
 }
 
-const FeeList = () => {
+const FeeVoucher = () => {
     const [loading, setLoading] = useState<boolean>(false)
-    const [feelist, setFeelist] = useState<FeeListItem[]>([])
+    const [feeVoucher, setFeeVoucher] = useState<FeeVoucherItem[]>([])
     const [prevValues, setPrevValues] = useState({})
     const addModal = useModal(false);
     const editModal = useModal(false);
 
-    const fetchFeelist = async () => {
+    const fetchData = async () => {
         setLoading(true)
         try {
-            const response = await API.getFeeList()
-            // console.log(response)
-            setFeelist(response.data)
+            const response = await API.getFeeVoucher()
+            console.log(response)
+            setFeeVoucher(response.data)
         } catch (error) {
             console.log(error)
         }
@@ -40,28 +41,19 @@ const FeeList = () => {
     }
 
     useEffect(() => {
-        fetchFeelist()
+        fetchData()
     }, [])
-
-    const toggleActive = async (values: {}) => {
-        try {
-            const response = await API.updateFeeList(values)
-        }
-        catch (error: any) {
-            console.log(error)
-        }
-    }
 
     const handleDelete = async (id: string) => {
         try {
             const formData = new FormData()
-            formData.append('fee_id', id)
-            const response = await API.deleteFeeList(formData)
+            formData.append('voucher_id', id)
+            const response = await API.deleteFeeVoucher(formData)
             Alert({
                 status: true,
-                text: 'Fee list deleted successfully...',
+                text: 'Fee ledger deleted successfully...',
             })
-            setFeelist(feelist.filter(item => item.FEE_ID !== id)) // Update the list after deletion
+            setFeeVoucher(feeVoucher.filter(item => item.VOUCHER_ID !== id))
         }
         catch (error: any) {
             console.log(error)
@@ -72,30 +64,39 @@ const FeeList = () => {
         }
     }
 
-    const columns: Column<FeeListItem>[] = [
+    const toggleActive = async (values: {}) => {
+        try {
+            const response = await API.updateFeeVoucher(values)
+        }
+        catch (error: any) {
+            console.log(error)
+        }
+    }
+
+    const columns: Column<FeeVoucherItem>[] = [
         {
-            key: 'session.SESSION_NAME',
-            header: 'Session',
+            key: 'school.SCHOOL_NAME',
+            header: 'School Name',
             sortable: true
         },
         {
-            key: 'standard.STANDARD_NAME',
-            header: 'Standard',
+            key: 'enrolment.student.NAME',
+            header: 'Student Name',
             sortable: true
         },
         {
-            key: 'fee_category.CAT_TITLE',
-            header: 'Category',
+            key: 'FEE_MONTH',
+            header: 'Fee Month',
             sortable: true
         },
         {
-            key: 'TITLE',
-            header: 'Title',
+            key: 'TOTAL_AMOUNT',
+            header: 'Total Amount',
             sortable: true
         },
         {
-            key: 'AMOUNT',
-            header: 'Amount',
+            key: 'DATE',
+            header: 'Date',
             sortable: true
         },
         {
@@ -107,12 +108,12 @@ const FeeList = () => {
                     <div>
                         <Switch label="" defaultChecked={row.ACTIVE == 1}
                             onChange={() => toggleActive({
-                                fee_id: row.FEE_ID,
-                                session_id: row.SESSION_ID,
-                                standard_id: row.STANDARD_ID,
-                                fee_cat_id: row.FEE_CAT_ID,
-                                title: row.TITLE,
-                                amount: row.AMOUNT,
+                                voucher_id: row.VOUCHER_ID,
+                                school_id: row.SCHOOL_ID,
+                                enrolment_id: row.enrolment.ENROLMENT_ID,
+                                fee_month: row.FEE_MONTH,
+                                date: row.DATE,
+                                total_amount: row.TOTAL_AMOUNT,
                                 remarks: row.REMARKS,
                                 active: row.ACTIVE == 1 ? 0 : 1
                             })}
@@ -124,8 +125,7 @@ const FeeList = () => {
         {
             key: 'REMARKS',
             header: 'Remarks',
-            sortable: true,
-            render: (row: any) => row.REMARKS || '-'
+            sortable: true
         },
         {
             key: 'ACTIONS',
@@ -145,11 +145,11 @@ const FeeList = () => {
 
                                 const confirm = await AlertConfirm({
                                     title: 'Are you sure?',
-                                    text: 'Do you really want to delete this session? This process cannot be undone.',
+                                    text: 'Do you really want to delete this voucher? This process cannot be undone.',
                                 })
 
                                 if (confirm) {
-                                    handleDelete(row.FEE_ID)
+                                    handleDelete(row.VOUCHER_ID)
                                 }
                             }}
                         >
@@ -168,11 +168,10 @@ const FeeList = () => {
         },
     ]
 
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">Feelist</h2>
+                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">Fee Vouchers</h2>
                 <Button size="sm" variant="primary"
                     onClick={() => addModal.openModal()}
                 >
@@ -180,14 +179,13 @@ const FeeList = () => {
                 </Button>
             </div>
 
-            <DataTable data={feelist} columns={columns} itemsPerPage={10} />
+            <DataTable data={feeVoucher} columns={columns} itemsPerPage={10} />
 
             {
                 addModal.isOpen &&
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-99999">
                     <div className="bg-white p-6 rounded w-[800px]">
-                        {/* <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} /> */}
-                        <FeeListAdd closeModal={addModal.closeModal} fetchData={fetchFeelist} />
+                        <FeeVoucherAdd closeModal={addModal.closeModal} fetchData={fetchData} />
                         <div className="flex justify-end gap-2 mt-4">
                             <Button variant="secondary" onClick={() => addModal.closeModal()}>
                                 Cancel
@@ -199,9 +197,9 @@ const FeeList = () => {
 
             {
                 editModal.isOpen &&
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-99999">
                     <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeListEdit fetchData={fetchFeelist} closeModal={editModal.closeModal} prevValues={prevValues} />
+                        <FeeVoucherEdit fetchData={fetchData} closeModal={editModal.closeModal} prevValues={prevValues} />
                         <div className="flex justify-end gap-2 mt-4">
                             <Button variant="secondary" onClick={() => editModal.closeModal()}>
                                 Cancel
@@ -214,4 +212,4 @@ const FeeList = () => {
     )
 }
 
-export default FeeList
+export default React.memo(FeeVoucher)

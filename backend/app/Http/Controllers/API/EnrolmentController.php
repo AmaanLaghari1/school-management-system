@@ -242,4 +242,23 @@ class EnrolmentController extends Controller
         }
     }
 
+    public function getEnrolmentBySchoolId($schoolId){
+        try {
+            $record = Enrolment::with([
+                'student:STUDENT_ID,NAME',
+                'session',
+                'standard:STANDARD_ID,SCHOOL_ID,STANDARD_NAME'
+            ])
+                ->whereHas('standard', function ($query) use ($schoolId) {
+                    $query->where('STANDARD_ID', $schoolId);
+                })
+                ->get();
+
+            return response()->json($record, 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error_message' => $e->getMessage()], 500);
+        }
+    }
+
 }

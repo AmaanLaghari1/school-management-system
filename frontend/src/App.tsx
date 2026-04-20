@@ -24,6 +24,9 @@ import EnrolmentEdit from "./pages/Enrolment/EnrolmentEdit";
 import PromoteClass from "./pages/Enrolment/PromoteClass";
 import FeeCategory from "./pages/FeeManagement/FeeCategory/FeeCategory";
 import FeeList from "./pages/FeeManagement/FeeList/FeeList";
+import FeeLedger from "./pages/FeeManagement/FeeLedger/FeeLedger";
+import FeeVoucher from "./pages/FeeManagement/FeeVoucher/FeeVoucher";
+import UserProfiles from "./pages/UserProfiles";
 
 export default function App() {
   const auth = useSelector((state:any) => state.auth?.authData)
@@ -59,6 +62,9 @@ export default function App() {
             <Route index path="/enrolment/promote/class" element={<PromoteClass />} />
             <Route index path="/fee/categories" element={<FeeCategory />} />
             <Route index path="/fee/lists" element={<FeeList />} />
+            <Route index path="/fee/ledgers" element={<FeeLedger />} />
+            <Route index path="/fee/voucher" element={<FeeVoucher />} />
+            <Route index path="/profile" element={<UserProfiles />} />
           </Route>
 
           {/* Auth Layout */}

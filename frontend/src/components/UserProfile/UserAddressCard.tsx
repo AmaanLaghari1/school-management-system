@@ -4,7 +4,7 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-export default function UserAddressCard() {
+export default function UserAddressCard({ data }: { data: any }) {
   const { isOpen, openModal, closeModal } = useModal();
   const handleSave = () => {
     // Handle save logic here
@@ -97,22 +97,22 @@ export default function UserAddressCard() {
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Country</Label>
-                  <Input type="text" value="United States" />
+                  <Input name="" type="text" value="United States" />
                 </div>
 
                 <div>
                   <Label>City/State</Label>
-                  <Input type="text" value="Arizona, United States." />
+                  <Input name="" type="text" value="Arizona, United States." />
                 </div>
 
                 <div>
                   <Label>Postal Code</Label>
-                  <Input type="text" value="ERT 2489" />
+                  <Input name="" type="text" value="ERT 2489" />
                 </div>
 
                 <div>
                   <Label>TAX ID</Label>
-                  <Input type="text" value="AS4568384" />
+                  <Input name="" type="text" value="AS4568384" />
                 </div>
               </div>
             </div>

@@ -26,6 +26,12 @@ export const getSessionById = (id: '') =>  API.get('/get/'+id, {
     }
 })
 
+export const getSessionBySchoolId = (id: '') =>  API.get('/get_by_school/'+id, {
+    headers: {
+        "Content-Type": "application/json"
+    }
+})
+
 export const deleteSession = (id: '') =>  API.delete('/delete/'+id, {
     headers: {
         "Content-Type": "application/json"

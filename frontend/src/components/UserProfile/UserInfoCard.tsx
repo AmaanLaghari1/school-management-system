@@ -4,7 +4,7 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-export default function UserInfoCard() {
+export default function UserInfoCard({ data }: { data: any }) {
   const { isOpen, openModal, closeModal } = useModal();
   const handleSave = () => {
     // Handle save logic here
@@ -22,28 +22,28 @@ export default function UserInfoCard() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                {data.NAME || ''}
               </p>
             </div>
 
-            <div>
+            {/* <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Last Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                 Chowdhury
               </p>
-            </div>
+            </div> */}
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Email address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {data.EMAIL || ''}
               </p>
             </div>
 
@@ -52,7 +52,7 @@ export default function UserInfoCard() {
                 Phone
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
+                {data.PHONE || ''}
               </p>
             </div>
 
@@ -111,6 +111,7 @@ export default function UserInfoCard() {
                   <div>
                     <Label>Facebook</Label>
                     <Input
+                      name=""
                       type="text"
                       value="https://www.facebook.com/PimjoHQ"
                     />
@@ -118,12 +119,13 @@ export default function UserInfoCard() {
 
                   <div>
                     <Label>X.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
+                    <Input name="" type="text" value="https://x.com/PimjoHQ" />
                   </div>
 
                   <div>
                     <Label>Linkedin</Label>
                     <Input
+                      name=""
                       type="text"
                       value="https://www.linkedin.com/company/pimjo"
                     />
@@ -131,7 +133,7 @@ export default function UserInfoCard() {
 
                   <div>
                     <Label>Instagram</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
+                    <Input name="" type="text" value="https://instagram.com/PimjoHQ" />
                   </div>
                 </div>
               </div>
@@ -143,27 +145,27 @@ export default function UserInfoCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>First Name</Label>
-                    <Input type="text" value="Musharof" />
+                    <Input name="" type="text" value="Musharof" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Last Name</Label>
-                    <Input type="text" value="Chowdhury" />
+                    <Input name="" type="text" value="Chowdhury" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" value="randomuser@pimjo.com" />
+                    <Input name="" type="text" value="randomuser@pimjo.com" />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" value="+09 363 398 46" />
+                    <Input name="" type="text" value="+09 363 398 46" />
                   </div>
 
                   <div className="col-span-2">
                     <Label>Bio</Label>
-                    <Input type="text" value="Team Manager" />
+                    <Input name="" type="text" value="Team Manager" />
                   </div>
                 </div>
               </div>

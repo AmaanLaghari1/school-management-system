@@ -127,4 +127,15 @@ class SessionController extends Controller
             return response()->json(['error_message' => $e->getMessage()], 500);
         }
     }
+
+    public function getSessionBySchoolId ($schoolId){
+        try {
+            $records = Session::where('SCHOOL_ID', $schoolId)->get();
+
+            return response()->json($records, 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error_message' => $e->getMessage()], 500);
+        }
+    }
 }

@@ -86,7 +86,9 @@ const navItems: NavItem[] = [
     path: "/fee",
     subItems: [
       { name: "Categories", path: "/fee/categories", pro: false },
-      { name: "Fee Lists", path: "/fee/lists", pro: false }
+      { name: "Fee Lists", path: "/fee/lists", pro: false },
+      { name: "Fee Ledgers", path: "/fee/ledgers", pro: false },
+      { name: "Fee Vouchers", path: "/fee/voucher", pro: false }
     ],
   }
 

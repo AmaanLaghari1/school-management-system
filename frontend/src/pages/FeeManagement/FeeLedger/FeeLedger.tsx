@@ -1,38 +1,37 @@
-import { useEffect, useState } from "react"
-import * as API from '../../../api/FeeList'
-import DataTable, { Column } from "../../../components/custom/DataTable";
-import Button from "../../../components/ui/button/Button";
-import AlertConfirm from "../../../components/custom/AlertConfirm";
-import { useModal } from "../../../hooks/useModal";
-import Switch from "../../../components/form/switch/Switch";
-import FeeListAdd from "./FeeListAdd";
-import FeeListEdit from "./FeeListEdit";
-import Alert from "../../../components/custom/Alert";
+import React, { useEffect, useState } from 'react'
+import { useModal } from '../../../hooks/useModal';
+import * as API from '../../../api/FeeLedger.ts'
+import Alert from '../../../components/custom/Alert';
+import DataTable, { Column } from '../../../components/custom/DataTable.tsx';
+import AlertConfirm from '../../../components/custom/AlertConfirm';
+import Button from '../../../components/ui/button/Button.tsx';
+import FeeLedgerAdd from './FeeLedgerAdd.tsx';
 
-interface FeeListItem {
-    FEE_ID: string;
-    FEE_CAT_ID: string;
-    SESSION_ID: string;
-    STANDARD_ID: string;
-    TITLE: string;
-    AMOUNT: string;
+interface FeeLedgerItem {
+    FEE_LEDGER_ID: string;
+    STUDENT_ID: string;
+    VOUCHER_ID: string;
+    DATE: string;
+    DETAIL: string;
+    VOUCHER_AMOUNT: string;
+    PAID_AMOUNT: string;
     REMARKS: string;
-    ACTIVE: boolean;
 }
 
-const FeeList = () => {
+
+const FeeLedger = () => {
     const [loading, setLoading] = useState<boolean>(false)
-    const [feelist, setFeelist] = useState<FeeListItem[]>([])
+    const [feeLedger, setFeeLedger] = useState<FeeLedgerItem[]>([])
     const [prevValues, setPrevValues] = useState({})
     const addModal = useModal(false);
     const editModal = useModal(false);
 
-    const fetchFeelist = async () => {
+    const fetchData = async () => {
         setLoading(true)
         try {
-            const response = await API.getFeeList()
+            const response = await API.getFeeLedger()
             // console.log(response)
-            setFeelist(response.data)
+            setFeeLedger(response.data)
         } catch (error) {
             console.log(error)
         }
@@ -40,28 +39,19 @@ const FeeList = () => {
     }
 
     useEffect(() => {
-        fetchFeelist()
+        fetchData()
     }, [])
-
-    const toggleActive = async (values: {}) => {
-        try {
-            const response = await API.updateFeeList(values)
-        }
-        catch (error: any) {
-            console.log(error)
-        }
-    }
 
     const handleDelete = async (id: string) => {
         try {
             const formData = new FormData()
-            formData.append('fee_id', id)
-            const response = await API.deleteFeeList(formData)
+            formData.append('fee_ledger_id', id)
+            const response = await API.deleteFeeLedger(formData)
             Alert({
                 status: true,
-                text: 'Fee list deleted successfully...',
+                text: 'Fee ledger deleted successfully...',
             })
-            setFeelist(feelist.filter(item => item.FEE_ID !== id)) // Update the list after deletion
+            setFeeLedger(feeLedger.filter(item => item.FEE_LEDGER_ID !== id)) // Update the list after deletion
         }
         catch (error: any) {
             console.log(error)
@@ -72,60 +62,36 @@ const FeeList = () => {
         }
     }
 
-    const columns: Column<FeeListItem>[] = [
+    const columns: Column<FeeLedgerItem>[] = [
         {
-            key: 'session.SESSION_NAME',
-            header: 'Session',
+            key: 'student.STUDENT_NAME',
+            header: 'Student Name',
             sortable: true
         },
         {
-            key: 'standard.STANDARD_NAME',
-            header: 'Standard',
+            key: 'DATE',
+            header: 'Date',
             sortable: true
         },
         {
-            key: 'fee_category.CAT_TITLE',
-            header: 'Category',
+            key: 'DETAIL',
+            header: 'Detail',
             sortable: true
         },
         {
-            key: 'TITLE',
-            header: 'Title',
+            key: 'VOUCHER_AMOUNT',
+            header: 'Voucher Amount',
             sortable: true
         },
         {
-            key: 'AMOUNT',
-            header: 'Amount',
+            key: 'PAID_AMOUNT',
+            header: 'Paid Amount',
             sortable: true
-        },
-        {
-            key: 'ACTIVE',
-            header: 'Active',
-            sortable: true,
-            render: (row: any) => {
-                return (
-                    <div>
-                        <Switch label="" defaultChecked={row.ACTIVE == 1}
-                            onChange={() => toggleActive({
-                                fee_id: row.FEE_ID,
-                                session_id: row.SESSION_ID,
-                                standard_id: row.STANDARD_ID,
-                                fee_cat_id: row.FEE_CAT_ID,
-                                title: row.TITLE,
-                                amount: row.AMOUNT,
-                                remarks: row.REMARKS,
-                                active: row.ACTIVE == 1 ? 0 : 1
-                            })}
-                        />
-                    </div>
-                )
-            }
         },
         {
             key: 'REMARKS',
             header: 'Remarks',
-            sortable: true,
-            render: (row: any) => row.REMARKS || '-'
+            sortable: true
         },
         {
             key: 'ACTIONS',
@@ -149,7 +115,7 @@ const FeeList = () => {
                                 })
 
                                 if (confirm) {
-                                    handleDelete(row.FEE_ID)
+                                    handleDelete(row.FEE_LEDGER_ID)
                                 }
                             }}
                         >
@@ -168,11 +134,10 @@ const FeeList = () => {
         },
     ]
 
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">Feelist</h2>
+                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">Fee Ledgers</h2>
                 <Button size="sm" variant="primary"
                     onClick={() => addModal.openModal()}
                 >
@@ -180,14 +145,13 @@ const FeeList = () => {
                 </Button>
             </div>
 
-            <DataTable data={feelist} columns={columns} itemsPerPage={10} />
-
+            <DataTable data={feeLedger} columns={columns} itemsPerPage={10} />
+        
             {
                 addModal.isOpen &&
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded w-[800px]">
-                        {/* <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} /> */}
-                        <FeeListAdd closeModal={addModal.closeModal} fetchData={fetchFeelist} />
+                        <FeeLedgerAdd closeModal={addModal.closeModal} fetchData={fetchData} />
                         <div className="flex justify-end gap-2 mt-4">
                             <Button variant="secondary" onClick={() => addModal.closeModal()}>
                                 Cancel
@@ -201,7 +165,7 @@ const FeeList = () => {
                 editModal.isOpen &&
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeListEdit fetchData={fetchFeelist} closeModal={editModal.closeModal} prevValues={prevValues} />
+                        {/* <FeeListEdit fetchData={fetchFeelist} closeModal={editModal.closeModal} prevValues={prevValues} /> */}
                         <div className="flex justify-end gap-2 mt-4">
                             <Button variant="secondary" onClick={() => editModal.closeModal()}>
                                 Cancel
@@ -214,4 +178,4 @@ const FeeList = () => {
     )
 }
 
-export default FeeList
+export default React.memo(FeeLedger)

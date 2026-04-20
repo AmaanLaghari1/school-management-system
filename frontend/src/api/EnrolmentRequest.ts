@@ -26,6 +26,12 @@ export const getEnrolmentById = (id: '') => API.get('/get/' + id, {
     }
 })
 
+export const getEnrolmentBySchoolId = (id: '') => API.get('/get_by_school/' + id, {
+    headers: {
+        "Content-Type": "application/json"
+    }
+})
+
 export const deleteEnrolment = (id: '') => API.delete('/delete/' + id, {
     headers: {
         "Content-Type": "application/json"

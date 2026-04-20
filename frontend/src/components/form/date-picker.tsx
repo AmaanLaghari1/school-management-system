@@ -5,6 +5,7 @@ import { useField, useFormikContext } from "formik";
 import Label from "./Label";
 import { CalenderIcon } from "../../icons";
 import DateOption = flatpickr.Options.DateOption;
+import "./date-picker.css";
 
 type PropsType = {
   id: string;
@@ -28,7 +29,7 @@ export default function DatePicker({
   disabled = false,
 }: PropsType) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [field, meta, helpers] = useField(name);
+  const [field, meta] = useField(name);
   const { setFieldValue } = useFormikContext();
 
   useEffect(() => {
@@ -40,12 +41,16 @@ export default function DatePicker({
       monthSelectorType: "static",
       dateFormat: "Y-m-d",
       defaultDate: field.value || defaultDate,
-      onChange: (selectedDates) => {
+
+      onChange: (selectedDates, dateStr) => {
         if (mode === "single") {
-          const selected = selectedDates[0] || null;
-          setFieldValue(name, selected ? selected.toISOString().split("T")[0] : "");
+          setFieldValue(name, dateStr || "");
         } else {
-          setFieldValue(name, selectedDates.map(d => d.toISOString().split("T")[0]));
+          // For multiple / range
+          const formatted = selectedDates.map((d) =>
+            fp.formatDate(d, "Y-m-d")
+          );
+          setFieldValue(name, formatted);
         }
       },
     });
@@ -59,7 +64,11 @@ export default function DatePicker({
 
   return (
     <div>
-      {label && <Label htmlFor={id}>{label}</Label>}
+      {label && (
+        <Label className="mt-3" htmlFor={id}>
+          {label}
+        </Label>
+      )}
 
       <div className="relative">
         <input
@@ -73,7 +82,7 @@ export default function DatePicker({
         />
 
         <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-          <CalenderIcon className="size-1" />
+          <CalenderIcon className="size-4" />
         </span>
       </div>
 
