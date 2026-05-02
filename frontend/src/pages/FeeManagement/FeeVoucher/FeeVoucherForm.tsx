@@ -1,171 +1,307 @@
-import { Form, Formik, FormikHelpers } from "formik";
-import Input from "../../../components/form/input/InputField";
-import Button from "../../../components/ui/button/Button";
-import { BoxIcon } from "lucide-react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import React, { FC, useEffect, useMemo, useState } from "react";
-import DatePicker from "../../../components/form/date-picker";
-import { getEnrolmentBySchoolId } from "../../../api/EnrolmentRequest";
-import { useSelector } from "react-redux";
+import { useQuery } from "@tanstack/react-query";
 import Select from "../../../components/form/Select";
-import { getSessionBySchoolId } from "../../../api/SessionRequest";
-import { getStandardBySchoolId } from "../../../api/StandardRequest";
+import Input from "../../../components/form/input/InputField";
+import DatePicker from "../../../components/form/date-picker";
+import Button from "../../../components/ui/button/Button";
+import FeeTable from "./FeeTable";
+import StudentListTable from "./StudentListTable";
+import {
+  getSession,
+  getSessionBySchoolId,
+} from "../../../api/SessionRequest";
+import {
+  getStandard,
+  getStandardBySchoolId,
+} from "../../../api/StandardRequest";
+import {
+  getEnrolmentByFilters,
+} from "../../../api/EnrolmentRequest";
+import { getFeeCategory } from "../../../api/FeeCategory";
+import { getFilteredFeelist } from "../../../api/FeeList";
+import { getFeeVoucher, getFeeVoucherBySchoolId } from "../../../api/FeeVoucher";
+import { useSelector } from "react-redux";
+import { isAllSchoolsUser } from "../../../helpers/helper";
 
-// Define props interface
-interface FormProps {
-    initialValues: { [key: string]: any };
-    validationSchema: Yup.AnySchema;
-    handleSubmit: (
-        values: any,
-        helpers: FormikHelpers<any>
-    ) => void | Promise<void>;
-    loading: boolean;
-    disableFields?: { [key: string]: boolean };
-}
+// 🔹 Debounce Hook
+const useDebounce = (value: any, delay = 400) => {
+  const [debounced, setDebounced] = useState(value);
 
-const FeeVoucherForm: FC<FormProps> = ({
-    initialValues,
-    validationSchema,
-    handleSubmit,
-    loading,
-}) => {
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
 
-    const [enrolments, setEnrolments] = useState<[]>([])
-    const [sessions, setSessions] = useState<[]>([])
-    const [standards, setStandards] = useState<[]>([])
-    const user = useSelector((state: {auth: {authData: {user: any}}}) => state.auth.authData.user)
-
-    const fetchEnrolments = async (standardId: any) => {
-        try {
-            const response = await getEnrolmentBySchoolId(standardId)
-            console.log(response)
-            setEnrolments(response.data || [])
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const enrolOptions = useMemo(() => {
-        return enrolments.map(item => ({ label: item['student']['NAME'], value: item['ENROLMENT_ID'] }))
-    }, [enrolments])
-
-    const fetchSessions = async () => {
-        try {
-            const response = await getSessionBySchoolId(user.SCHOOL_ID)
-            // console.log(response)
-            setSessions(response.data || [])
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const fetchStandards = async () => {
-        try {
-            const response = await getStandardBySchoolId(user.SCHOOL_ID)
-            // console.log(response)
-            setStandards(response.data || [])
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const standardOptions = useMemo(() => {
-        return standards.map(item => ({ label: item['STANDARD_NAME']+" ("+item['SECTION']+")", value: item['STANDARD_ID'] }))
-    }, [standards])
-
-    const handleStandardChange = (e: any, setFieldValue: any) => {
-        setFieldValue('standard_id', e)
-        fetchEnrolments(e)
-    }
-
-    useEffect(() => {
-        // fetchEnrolments()
-        fetchSessions()
-        fetchStandards()
-    }, [])
-
-    return (
-        <div>
-            <Formik
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                onSubmit={(values, helpers) => handleSubmit(values, helpers)}
-                enableReinitialize={true}
-            >
-                {({ setFieldValue, values }) => {
-
-                    if(values.standard_id != '' && enrolments.length === 0) {
-                        fetchEnrolments(values.standard_id)
-                    }
-
-                    return <Form>
-                        <div className="grid sm:grid-cols-2 gap-2">
-                            <Select
-                                label="Session"
-                                name="session_id"
-                                options={sessions.map(item => ({ label: item['SESSION_NAME'], value: item['SESSION_ID'] }))}
-                                required={true}
-                            />
-                            <Select
-                                label="Standard"
-                                name="standard_id"
-                                options={standardOptions}
-                                onChange={(e: any) => handleStandardChange(e, setFieldValue)}
-                                required={true}
-                            />
-                            <Select
-                                label="Student"
-                                name="enrolment_id"
-                                options={enrolOptions}
-                                required={true}
-                            />
-                            <Input
-                                name="fee_month"
-                                type="text"
-                                placeholder="Enter fee month"
-                                label="Fee Month"
-                                required={true}
-                            />
-                            <DatePicker
-                                id="date"
-                                name="date"
-                                label="Date"
-                                placeholder="Pick a date"
-                            />
-                            <Input
-                                name="total_amount"
-                                type="text"
-                                placeholder="Enter total amount"
-                                label="Total Amount"
-                                onInput={(e: React.FormEvent<HTMLInputElement>) =>
-                                    (e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.replace(/\D/g, '')
-                                }
-                                required={true}
-                            />
-                            <Input
-                                name="remarks"
-                                type="text"
-                                placeholder="Enter remarks"
-                                label="Remarks"
-                            />
-                        </div>
-
-                        <Button
-                            size="sm"
-                            variant="success"
-                            className="mt-5"
-                            endIcon={<BoxIcon className="size-5" />}
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading ? "Saving..." : "Save"}
-                        </Button>
-                    </Form>
-                }
-                }
-            </Formik>
-        </div>
-    );
+  return debounced;
 };
 
-export default React.memo(FeeVoucherForm);
+const validationSchema = Yup.object({
+  session_id: Yup.string().required("Required"),
+  standard_id: Yup.string().required("Required"),
+  fee_month: Yup.string().required("Required"),
+  date: Yup.string().required("Required"),
+  fee_cat_id: Yup.string().required("Required"),
+});
+
+const belongsToSchool = (record: any, schoolId: any) => {
+  const target = String(schoolId ?? "");
+
+  return [
+    record?.SCHOOL_ID,
+    record?.school?.SCHOOL_ID,
+    record?.student?.SCHOOL_ID,
+    record?.student?.school?.SCHOOL_ID,
+    record?.standard?.SCHOOL_ID,
+    record?.enrolment?.SCHOOL_ID,
+    record?.enrolment?.student?.SCHOOL_ID,
+  ].some((value) => String(value ?? "") === target);
+};
+
+const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
+  const user = useSelector((state: any) => state.auth.authData.user);
+  const canViewAllSchools = isAllSchoolsUser(user);
+  const lastStudentSetRef = useRef("");
+
+  return (
+    <Formik
+      initialValues={{
+        selected_fees: [],
+        selected_students: [],
+        ...initialValues,
+      }}
+      validationSchema={validationSchema}
+      onSubmit={onSubmit}
+      enableReinitialize
+    >
+      {({ values, setFieldValue }) => {
+
+        // 🔹 Debounced filters (stable input)
+        const debouncedFilters = useDebounce({
+          session_id: values.session_id,
+          standard_id: values.standard_id,
+          fee_cat_id: values.fee_cat_id,
+        });
+
+        // 🔹 Queries
+        const { data: sessions = [] } = useQuery({
+          queryKey: ["sessions", user.SCHOOL_ID],
+          queryFn: () => canViewAllSchools ? getSession() : getSessionBySchoolId(user.SCHOOL_ID),
+          select: (res) => res.data || [],
+        });
+
+        const { data: standards = [] } = useQuery({
+          queryKey: ["standards", user.SCHOOL_ID],
+          queryFn: () => canViewAllSchools ? getStandard() : getStandardBySchoolId(user.SCHOOL_ID),
+          select: (res) => res.data || [],
+        });
+
+        const {
+          data: enrolments = [],
+          isLoading: enrolmentsLoading,
+        } = useQuery({
+          queryKey: ["enrolments", values.session_id, values.standard_id],
+          queryFn: () =>
+            getEnrolmentByFilters(values.session_id, values.standard_id),
+          enabled: !!values.session_id && !!values.standard_id,
+          select: (res) => res.data || [],
+        });
+
+        const { data: feeCategories = [] } = useQuery({
+          queryKey: ["feeCategories"],
+          queryFn: getFeeCategory,
+          select: (res) => res.data || [],
+        });
+
+        const { data: vouchers = [] } = useQuery({
+          queryKey: ["feeVouchers", user.SCHOOL_ID],
+          queryFn: () => canViewAllSchools ? getFeeVoucher() : getFeeVoucherBySchoolId(user.SCHOOL_ID),
+          select: (res) => res.data || [],
+        });
+
+        const {
+          data: feeList = [],
+          isFetching: feeLoading,
+        } = useQuery({
+          queryKey: ["feeList", debouncedFilters],
+          queryFn: () => getFilteredFeelist(debouncedFilters),
+          enabled:
+            !!values.session_id &&
+            !!values.standard_id &&
+            !!values.fee_cat_id,
+          select: (res) => res.data || [],
+        });
+
+        // 🔹 Options
+        const sessionOptions = useMemo(
+          () =>
+            sessions.map((s: any) => ({
+              label: s.SESSION_NAME,
+              value: s.SESSION_ID,
+            })),
+          [sessions]
+        );
+
+        const standardOptions = useMemo(
+          () =>
+            standards.map((s: any) => ({
+              label: s.STANDARD_NAME,
+              value: s.STANDARD_ID,
+            })),
+          [standards]
+        );
+
+        const feeCategoryOptions = useMemo(
+          () =>
+            feeCategories.map((c: any) => ({
+              label: c.CAT_TITLE,
+              value: c.FEE_CAT_ID,
+            })),
+          [feeCategories]
+        );
+
+        const dueAmountMap = useMemo(() => {
+          const map = new Map();
+
+          vouchers.forEach((voucher: any) => {
+            if (!voucher?.ENROLMENT_ID) return;
+            map.set(voucher.ENROLMENT_ID, voucher.DUES_AMOUNT ?? "");
+          });
+
+          return map;
+        }, [vouchers]);
+
+        const scopedEnrolments = useMemo(
+          () =>
+            canViewAllSchools
+              ? enrolments
+              : enrolments.filter((student: any) =>
+                  belongsToSchool(student, user?.SCHOOL_ID)
+                ),
+          [enrolments, canViewAllSchools, user?.SCHOOL_ID]
+        );
+
+        const studentsWithDues = useMemo(
+          () =>
+            scopedEnrolments.map((student: any) => ({
+              ...student,
+              DUES_AMOUNT: dueAmountMap.get(student.ENROLMENT_ID) ?? "",
+            })),
+          [scopedEnrolments, dueAmountMap]
+        );
+
+        // 🔹 Derived total (no Formik state)
+        const total = useMemo(() => {
+          return values.selected_fees.reduce(
+            (sum: number, f: any) => sum + Number(f.AMOUNT || 0),
+            0
+          );
+        }, [values.selected_fees]);
+
+        useEffect(() => {
+          if (values.current_amount !== total) {
+            setFieldValue("current_amount", total);
+          }
+        }, [total, values.current_amount, setFieldValue]);
+
+        // 🔹 Handlers
+        const handleFeeChange = useCallback((fees: any[]) => {
+          setFieldValue("selected_fees", fees);
+        }, [setFieldValue]);
+
+        const handleStudentChange = useCallback((students: any[]) => {
+          setFieldValue("selected_students", students);
+        }, [setFieldValue]);
+
+        // 🔹 Auto-select students safely (no loop)
+        useEffect(() => {
+          const allStudents =
+            studentsWithDues.length > 0
+              ? studentsWithDues.map((s: any) => ({
+                ENROLMENT_ID: s.ENROLMENT_ID,
+                NAME: s?.student?.NAME || "N/A",
+                DUES_AMOUNT: s.DUES_AMOUNT ?? "",
+              }))
+              : [];
+
+          const studentSetKey = allStudents
+            .map((student: any) => student.ENROLMENT_ID)
+            .join("|");
+
+          if (lastStudentSetRef.current !== studentSetKey) {
+            lastStudentSetRef.current = studentSetKey;
+            setFieldValue("selected_students", allStudents);
+          }
+        }, [studentsWithDues, setFieldValue]);
+
+        return (
+          <Form>
+            <div className="grid sm:grid-cols-2 gap-2">
+
+              <Select
+                name="session_id"
+                label="Session"
+                options={sessionOptions}
+                required
+              />
+
+              <Select
+                name="standard_id"
+                label="Standard"
+                options={standardOptions}
+                required
+              />
+
+              <StudentListTable
+                students={studentsWithDues}
+                selectedStudents={values.selected_students}
+                onChange={handleStudentChange}
+                loading={enrolmentsLoading}
+              />
+
+              <Input name="fee_month" type="month" label="Month" required />
+
+              <Select
+                name="fee_cat_id"
+                label="Fee Category"
+                disabled={!values.standard_id || !values.session_id}
+                options={feeCategoryOptions}
+                required
+              />
+
+              <DatePicker
+                id="date"
+                name="date"
+                label="Issue Date"
+                required
+              />
+
+              <FeeTable
+                feeList={feeList}
+                selectedFees={values.selected_fees}
+                onChange={handleFeeChange}
+                loading={feeLoading}
+              />
+
+              {/* ✅ Derived value (no state loop) */}
+              <Input
+                name="current_amount"
+                label="Current Amount"
+                value={total}
+              />
+
+              <Input name="remarks" label="Remarks" />
+            </div>
+
+            <Button className="mt-5" disabled={loading} type="submit">
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </Form>
+        );
+      }}
+    </Formik>
+  );
+};
+
+export default FeeVoucherForm;

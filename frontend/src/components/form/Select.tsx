@@ -3,8 +3,8 @@ import { Field } from "formik";
 import Label from "./Label";
 
 interface Option {
-  value: string;
-  label: string;
+  value: string | number;
+  label: string | number;
 }
 
 interface SelectProps {
@@ -52,7 +52,7 @@ const Select: React.FC<SelectProps> = ({
         }
 
         const filteredOptions = options.filter((opt) =>
-          (opt.label || "").toLowerCase().includes((searchTerm || "").toLowerCase())
+          (String(opt.label) || "").toLowerCase().includes((searchTerm || "").toLowerCase())
         );
 
         return (
@@ -92,16 +92,16 @@ const Select: React.FC<SelectProps> = ({
                     <li
                       key={option.value}
                       onMouseDown={() => {
-                        // ✅ Update Formik
+                        // Update Formik
                         form.setFieldValue(name, option.value);
 
-                        // ✅ Call external handler if provided
+                        // Call external handler if provided
                         if (onChange) onChange(option.value);
 
                         setSearchTerm("");
                         setOpen(false);
                       }}
-                      className={`px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                      className={`px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white ${
                         field.value === option.value
                           ? "bg-gray-100 dark:bg-gray-800"
                           : ""

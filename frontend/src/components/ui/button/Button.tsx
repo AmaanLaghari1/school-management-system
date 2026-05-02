@@ -73,7 +73,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${className} ${
+      className={`inline-flex flex-wrap items-center justify-center gap-2 rounded-lg transition ${className} ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${
         disabled ? "cursor-not-allowed opacity-50" : ""
@@ -82,9 +82,9 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       type={type}
     >
-      {startIcon && <span className="flex items-center">{startIcon}</span>}
+      {startIcon && <span className="flex flex-wrap items-center">{startIcon}</span>}
       {children}
-      {endIcon && <span className="flex items-center">{endIcon}</span>}
+      {endIcon && <span className="flex flex-wrap items-center">{endIcon}</span>}
     </button>
   );
 };

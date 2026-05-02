@@ -1,71 +1,61 @@
-import React, { use, useState } from 'react'
-import SubHeading from '../../../components/custom/SubHeading'
-import FeeVoucherForm from './FeeVoucherForm'
-import * as Yup from 'yup'
-import * as API from '../../../api/FeeVoucher'
-import Alert from '../../../components/custom/Alert'
-import { useSelector } from 'react-redux'
+import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import * as API from "../../../api/FeeVoucher";
+import Alert from "../../../components/custom/Alert";
+import SubHeading from "../../../components/custom/SubHeading";
+import FeeVoucherForm from "./FeeVoucherForm";
+import { useSelector } from "react-redux";
 
-interface FeeVoucherAddProps {
-    closeModal: any;
-    fetchData: any;
-}
+const FeeVoucherAdd = () => {
+    const navigate = useNavigate();
+    const user = useSelector((state: any) => state.auth.authData.user);
 
-const FeeVoucherAdd = ({ closeModal, fetchData }: FeeVoucherAddProps) => {
-    const [loading, setLoading] = useState(false)
-    const auth = useSelector((state: { auth: { authData: { user: any } } }) => state.auth.authData.user)
+    const mutation = useMutation({
+    mutationFn: API.createFeeVoucher,
+
+    onSuccess: (data, variables) => {
+        // console.log("FORM VALUES:", variables);
+        // return
+        // console.log("API RESPONSE:", data);
+
+        Alert({ status: true, text: "Fee voucher created successfully" });
+        navigate("/fee/vouchers");
+    },
+    
+    onError: (error:any, variables) => {
+        console.log("FAILED VALUES:", variables);
+        console.error(error);
+        Alert({ status: false, text: error.data?.message || "Something went wrong!" });
+
+        Alert({ status: false, text: "Something went wrong" });
+    },
+});
     const initialValues = {
-        school_id: auth.SCHOOL_ID,
-        session_id: '',
-        standard_id: '',
-        enrolment_id: '',
-        fee_month: '',
-        date: '',
-        total_amount: '',
-        remarks: ''
-    }
-    const validationSchema = Yup.object().shape({
-        session_id: Yup.string().required('Required!'),
-        standard_id: Yup.string().required('Required!'),
-        enrolment_id: Yup.string().required('Required!'),
-        fee_month: Yup.string().required('Required!'),
-        date: Yup.string().required('Required!'),
-        total_amount: Yup.number().required('Required!').positive('Amount must be a positive number!'),
-    })
+        school_id: user.SCHOOL_ID,
+        session_id: "",
+        standard_id: "",
+        enrolment_id: "",
+        fee_cat_id: "",
+        fee_month: "",
+        date: "",
+        remarks: "",
+        selected_fees: [],
+        fee_remarks: {},
+        current_amount: 0,
+        due_amount: 0
+    };
 
-    const handleSubmit = async (values: {}) => {
-        setLoading(true)
-        try {
-            const response = await API.createFeeVoucher(values)
-            console.log(response.data)
-            closeModal()
-            fetchData()
-            Alert({
-                status: true,
-                text: 'Fee voucher created successfully...',
-            })
-        } catch (error: any) {
-            console.error(error)
-            Alert({
-                status: false,
-                text: 'Something went wrong! Please try again.',
-            })
-        }
-        setLoading(false)
-    }
+    return (
+        <div>
+            <SubHeading>Add New Fee Voucher</SubHeading>
 
-  return (
-    <div>
-        <SubHeading>Add New Fee Voucher</SubHeading>
+            <FeeVoucherForm
+                initialValues={initialValues}
+                onSubmit={(values: any) => mutation.mutate(values)}
+                loading={mutation.isPending}
+            />
+        </div>
+    );
+};
 
-        <FeeVoucherForm
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        handleSubmit={handleSubmit}
-        loading={loading}
-        />
-    </div>
-  )
-}
-
-export default React.memo(FeeVoucherAdd)
+export default FeeVoucherAdd;

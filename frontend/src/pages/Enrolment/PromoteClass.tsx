@@ -1,10 +1,10 @@
 import { Form, Formik, FormikHelpers } from "formik"
 import { useEffect, useMemo, useState } from "react"
-import { mapOptions } from "../../helpers/helper"
+import { filterSchoolsForUser, isAllSchoolsUser, mapOptions } from "../../helpers/helper"
 import { getSchool } from "../../api/SchoolRequest"
 import Select from "../../components/form/Select"
 import { getStandardBySchoolId } from "../../api/StandardRequest"
-import { getSession } from "../../api/SessionRequest"
+import { getSessionBySchoolId } from "../../api/SessionRequest"
 import Button from "../../components/ui/button/Button"
 import SubHeading from "../../components/custom/SubHeading"
 import * as Yup from 'yup'
@@ -20,12 +20,12 @@ const PromoteClass = () => {
     const [sessions, setSessions] = useState<[]>([])
     const [standards, setStandards] = useState<[]>([])
     const {user} = useUser()
+    const canViewAllSchools = isAllSchoolsUser(user)
 
     const fetchSchools = async () => {
         try {
             const response = await getSchool()
-            // console.log(response)
-            setSchools(response.data.filter((item: { SCHOOL_ID: any }) => item.SCHOOL_ID == user.SCHOOL_ID))
+            setSchools(filterSchoolsForUser(response.data || [], user) as [])
         } catch (error: any) {
             console.log(error)
         }
@@ -52,10 +52,9 @@ const PromoteClass = () => {
         })) || [];
     }, [standards]);
 
-    const fetchSessions = async () => {
+    const fetchSessions = async (schoolId: any) => {
         try {
-            const response = await getSession()
-            // console.log(response)
+            const response = await getSessionBySchoolId(schoolId)
             setSessions(response.data)
         } catch (error: any) {
             console.log(error)
@@ -69,10 +68,14 @@ const PromoteClass = () => {
 
     useEffect(() => {
         fetchSchools()
+        if (!canViewAllSchools && user?.SCHOOL_ID) {
+            fetchSessions(user.SCHOOL_ID)
+            fetchStandards(user.SCHOOL_ID)
+        }
     }, [])
 
     const initialValues = {
-        school_id: '',
+        school_id: canViewAllSchools ? '' : user?.SCHOOL_ID || '',
         standard_id: '',
         previous_standard_id: '',
         session_id: '',
@@ -125,7 +128,7 @@ const PromoteClass = () => {
                                     options={schoolOptions}
                                     onChange={(e: any) => {
                                         // console.log(e)
-                                        fetchSessions()
+                                        fetchSessions(e)
                                         fetchStandards(e)
                                     }
                                     }

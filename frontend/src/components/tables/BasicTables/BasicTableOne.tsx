@@ -155,7 +155,7 @@ export default function BasicTableOne() {
             {tableData.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <div className="w-10 h-10 overflow-hidden rounded-full">
                       <img
                         width={40}
@@ -178,7 +178,7 @@ export default function BasicTableOne() {
                   {order.projectName}
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <div className="flex -space-x-2">
+                  <div className="flex flex-wrap -space-x-2">
                     {order.team.images.map((teamImage, index) => (
                       <div
                         key={index}

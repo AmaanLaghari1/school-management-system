@@ -14,7 +14,7 @@ export default function Avatars() {
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="Default Avatar">
           {/* Default Avatar (No Status) */}
-          <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <div className="flex flex-wrap flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar src="/images/user/user-01.jpg" size="xsmall" />
             <Avatar src="/images/user/user-01.jpg" size="small" />
             <Avatar src="/images/user/user-01.jpg" size="medium" />
@@ -24,7 +24,7 @@ export default function Avatars() {
           </div>
         </ComponentCard>
         <ComponentCard title="Avatar with online indicator">
-          <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <div className="flex flex-wrap flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar
               src="/images/user/user-01.jpg"
               size="xsmall"
@@ -58,7 +58,7 @@ export default function Avatars() {
           </div>
         </ComponentCard>
         <ComponentCard title="Avatar with Offline indicator">
-          <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <div className="flex flex-wrap flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar
               src="/images/user/user-01.jpg"
               size="xsmall"
@@ -92,7 +92,7 @@ export default function Avatars() {
           </div>
         </ComponentCard>{" "}
         <ComponentCard title="Avatar with busy indicator">
-          <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <div className="flex flex-wrap flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar
               src="/images/user/user-01.jpg"
               size="xsmall"

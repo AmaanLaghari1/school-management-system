@@ -12,7 +12,7 @@ class FeeLedgerController extends Controller
 {
     public function index(){
         try {
-            $feeLedger = FeeLedger::with(['student', 'fee_list'])->get();
+            $feeLedger = FeeLedger::with(['student'])->get();
 
             return response()->json($feeLedger, 200);
         }
@@ -26,7 +26,7 @@ class FeeLedgerController extends Controller
 
     public function show($id){
         try {
-            $feeLedger = FeeLedger::with(['student', 'fee_list'])->find($id);
+            $feeLedger = FeeLedger::with(['student'])->find($id);
 
             return response()->json($feeLedger, 200);
         }
@@ -42,7 +42,7 @@ class FeeLedgerController extends Controller
         try {
             $validation = Validator::make(request()->all(), [
                'student_id' => 'required',
-               'voucher_id' => 'required',
+               'voucher_id' => 'nullable',
                'date' => 'required',
                'detail' => 'required',
                'voucher_amount' => 'required',
@@ -57,11 +57,13 @@ class FeeLedgerController extends Controller
             }
 
             $data = [
-                'student_id' => $request->student_id,
-                'voucher_id' => $request->voucher_id,
-                'date' => $request->date,
-                'detail' => $request->detail,
-                'voucher_amount' => $request->voucher_amount
+                'STUDENT_ID' => $request->student_id,
+                'VOUCHER_ID' => $request->voucher_id,
+                'DATE' => $request->date,
+                'VOUCHER_AMOUNT' => $request->voucher_amount,
+                'PAID_AMOUNT' => $request->paid_amount,
+                'DETAIL' => $request->detail,
+                'REMARKS' => $request->remarks
             ];
 
             DB::beginTransaction();
@@ -69,10 +71,8 @@ class FeeLedgerController extends Controller
 
             if($record){
                 DB::commit();
-                return response()->json(['message' => 'Fee Ledger created successfully...'], 201);
+                return response()->json(['message' => 'Fee Ledger created successfully...'], 200);
             }
-
-            return response()->json(['message' => 'Unable to create fee ledger!'], 500);
         }
         catch (\Exception $e) {
             DB::rollBack();
@@ -83,12 +83,12 @@ class FeeLedgerController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request){
         try {
             $validation = Validator::make(request()->all(), [
                 'fee_ledger_id' => 'required',
                 'student_id' => 'required',
-                'voucher_id' => 'required',
+                'voucher_id' => 'nullable',
                 'date' => 'required',
                 'detail' => 'required',
                 'voucher_amount' => 'required',
@@ -106,11 +106,13 @@ class FeeLedgerController extends Controller
 
             if($record){
                 $data = [
-                    'student_id' => $request->student_id,
-                    'voucher_id' => $request->voucher_id,
-                    'date' => $request->date,
-                    'detail' => $request->detail,
-                    'voucher_amount' => $request->voucher_amount
+                    'STUDENT_ID' => $request->student_id,
+                    'VOUCHER_ID' => $request->voucher_id,
+                    'DATE' => $request->date,
+                    'VOUCHER_AMOUNT' => $request->voucher_amount,
+                    'PAID_AMOUNT' => $request->paid_amount,
+                    'DETAIL' => $request->detail,
+                    'REMARKS' => $request->remarks
                 ];
 
                 DB::beginTransaction();

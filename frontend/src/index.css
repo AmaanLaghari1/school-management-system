@@ -191,7 +191,7 @@ layer(base);
 }
 
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  @apply relative flex flex-wrap items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
 }
 
 @utility menu-item-active {
@@ -233,7 +233,7 @@ layer(base);
 }
 
 @utility menu-dropdown-item {
-  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+  @apply relative flex flex-wrap items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
 }
 
 @utility menu-dropdown-item-active {
@@ -428,7 +428,7 @@ layer(base);
 }
 
 .flatpickr-day {
-  @apply !flex !items-center !text-theme-sm !font-medium !text-gray-800 dark:!text-white/90 dark:hover:!border-gray-300 dark:hover:!bg-gray-900;
+  @apply !flex !flex-wrap !items-center !text-theme-sm !font-medium !text-gray-800 dark:!text-white/90 dark:hover:!border-gray-300 dark:hover:!bg-gray-900;
 }
 .flatpickr-day.nextMonthDay,
 .flatpickr-day.prevMonthDay {
@@ -561,7 +561,7 @@ span.flatpickr-weekday,
   @apply gap-2;
 }
 .fc-button-group .fc-button {
-  @apply flex h-10 w-10 items-center justify-center !rounded-lg border border-gray-200 bg-transparent hover:border-gray-200 hover:bg-gray-50 focus:shadow-none active:!border-gray-200 active:!bg-transparent active:!shadow-none dark:border-gray-800 dark:hover:border-gray-800 dark:hover:bg-gray-900 dark:active:border-gray-800!;
+  @apply flex flex-wrap h-10 w-10 items-center justify-center !rounded-lg border border-gray-200 bg-transparent hover:border-gray-200 hover:bg-gray-50 focus:shadow-none active:!border-gray-200 active:!bg-transparent active:!shadow-none dark:border-gray-800 dark:hover:border-gray-800 dark:hover:bg-gray-900 dark:active:border-gray-800!;
 }
 
 .fc-button-group .fc-button.fc-prev-button:before {
@@ -717,7 +717,7 @@ span.flatpickr-weekday,
 
 .carouselThree .swiper-pagination,
 .carouselFour .swiper-pagination {
-  @apply !bottom-3 !left-1/2 inline-flex !w-auto -translate-x-1/2 items-center gap-1.5 rounded-[40px] border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 shadow-slider-navigation backdrop-blur-[10px] sm:!bottom-5;
+  @apply !bottom-3 !left-1/2 inline-flex flex-wrap !w-auto -translate-x-1/2 items-center gap-1.5 rounded-[40px] border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 shadow-slider-navigation backdrop-blur-[10px] sm:!bottom-5;
 }
 
 .carouselThree .swiper-pagination-bullet,

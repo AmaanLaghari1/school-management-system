@@ -3,20 +3,16 @@ import { Link, useLocation } from "react-router";
 
 // Assume these icons are imported from an icon library
 import {
-  BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
+  UserIcon,
+  DollarLineIcon,
+  FolderIcon,
+  // ShootingStarIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 import RoleSwitcher from "../components/custom/RoleSwitcher";
 
 type NavItem = {
@@ -35,42 +31,42 @@ const navItems: NavItem[] = [
   },
   
   // {
-  //   icon: <GridIcon />,
+  //   icon: <ShootingStarIcon />,
   //   name: "Schools",
   //   path: "/schools"
   //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   // },
   
   {
-    icon: <GridIcon />,
+    icon: <UserIcon />,
     name: "Students",
     path: "/students"
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
   
   // {
-  //   icon: <GridIcon />,
+  //   icon: <CalenderIcon />,
   //   name: "Sessions",
   //   path: "/sessions"
   //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   // },
   
   // {
-  //   icon: <GridIcon />,
+  //   icon: <FileIcon />,
   //   name: "Standards",
   //   path: "/standards"
   //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   // },
   
   {
-    icon: <GridIcon />,
+    icon: <ListIcon />,
     name: "Enrolments",
     path: "/enrolments"
     // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   },
   
   {
-    icon: <GridIcon />,
+    icon: <FolderIcon />,
     name: "Setup",
     path: "",
     subItems: [
@@ -81,14 +77,14 @@ const navItems: NavItem[] = [
   },
   
   {
-    icon: <GridIcon />,
+    icon: <DollarLineIcon />,
     name: "Fee Management",
     path: "/fee",
     subItems: [
       { name: "Categories", path: "/fee/categories", pro: false },
       { name: "Fee Lists", path: "/fee/lists", pro: false },
       { name: "Fee Ledgers", path: "/fee/ledgers", pro: false },
-      { name: "Fee Vouchers", path: "/fee/voucher", pro: false }
+      { name: "Fee Vouchers", path: "/fee/vouchers", pro: false }
     ],
   }
 
@@ -166,11 +162,16 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
-  const isActive = useCallback(
-    (path: string) => location.pathname === path,
-    [location.pathname]
-  );
+  const isActive = (path: string) => location.pathname === path;
+  // const isActive = useCallback(
+  //   (path: string) => {
+  //     if (path === '/') {
+  //       return location.pathname === '/';
+  //     }
+  //     return location.pathname.startsWith(path);
+  //   },
+  //   [location.pathname]
+  // );
 
   useEffect(() => {
     let submenuMatched = false;
@@ -179,7 +180,7 @@ const AppSidebar: React.FC = () => {
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
-            if (isActive(subItem.path)) {
+            if (location.pathname.startsWith(subItem.path)) {
               setOpenSubmenu({
                 type: menuType as "main" | "others",
                 index,
@@ -194,7 +195,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [location, isActive]);
+  }, [location]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -222,7 +223,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-wrap flex-col gap-4">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
@@ -309,7 +310,7 @@ const AppSidebar: React.FC = () => {
                       }`}
                     >
                       {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
+                      <span className="flex flex-wrap items-center gap-1 ml-auto">
                         {subItem.new && (
                           <span
                             className={`ml-auto ${
@@ -346,7 +347,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-wrap flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -360,7 +361,7 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${
+        className={`py-8 flex flex-wrap ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
@@ -393,12 +394,12 @@ const AppSidebar: React.FC = () => {
         </Link>
       </div>
       <RoleSwitcher />
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex flex-wrap flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                className={`mb-4 text-xs uppercase flex flex-wrap leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
@@ -414,7 +415,7 @@ const AppSidebar: React.FC = () => {
             </div>
             {/* <div className="">
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                className={`mb-4 text-xs uppercase flex flex-wrap leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"

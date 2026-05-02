@@ -6,6 +6,8 @@ import Button from "../../components/ui/button/Button";
 import Alert from "../../components/custom/Alert";
 import AlertConfirm from "../../components/custom/AlertConfirm";
 import { useUser } from "../../hooks/useUser";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { isAllSchoolsUser } from "../../helpers/helper";
 
 interface Session {
     SESSION_ID: string;
@@ -23,13 +25,18 @@ const Session = () => {
     const navigate = useNavigate()
     // const user = useSelector((state: any) => state.auth.authData.user)
     const {user} = useUser()
+    const canViewAllSchools = isAllSchoolsUser(user)
 
     const fetchSessions = async () => {
         setLoading(true)
         try {
             const response = await API.getSession()
-            // console.log(response)
-            setSessions(response.data.filter((item: any) => item.SCHOOL_ID === user.SCHOOL_ID))
+            const data = response.data || []
+            setSessions(
+                canViewAllSchools
+                    ? data
+                    : data.filter((item: any) => String(item.SCHOOL_ID) === String(user.SCHOOL_ID))
+            )
         } catch (error) {
             console.log(error)
         }
@@ -50,11 +57,11 @@ const Session = () => {
     }
 
     const columns: Column<Session>[] = [
-        // {
-        //     key: 'SESSION_ID',
-        //     header: 'ID',
-        //     sortable: true
-        // },
+        {
+            key: 'school.SCHOOL_NAME',
+            header: 'School Name',
+            sortable: true
+        },
         {
             key: 'SESSION_NAME',
             header: 'Session Name',
@@ -70,7 +77,7 @@ const Session = () => {
             header: 'Actions',
             render: (row: any) => {
                 return (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap space-x-2">
                         <button className="text-blue-600 hover:underline text-sm"
                             onClick={() => {
                                 navigate('/session/edit', {
@@ -103,9 +110,9 @@ const Session = () => {
         fetchSessions()
     }, [])
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">All Sessions</h2>
+        <div className="space-y-2">
+            <div className="flex flex-wrap justify-between items-center">
+                <PageBreadcrumb pageTitle="Sessions" />
                 <Link to="/session/add">
                     <Button size="sm" variant="primary">
                         Add New +

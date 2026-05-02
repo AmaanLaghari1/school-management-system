@@ -4,16 +4,17 @@ import * as API from '../../api/EnrolmentRequest';
 import DataTable, { Column } from "../../components/custom/DataTable";
 import Button from "../../components/ui/button/Button";
 import Alert from "../../components/custom/Alert";
-import MainHeading from "../../components/custom/MainHeading";
 import { Form, Formik } from "formik";
 import { getSchool } from "../../api/SchoolRequest";
-import { mapOptions } from "../../helpers/helper";
+import { filterSchoolsForUser, isAllSchoolsUser, mapOptions } from "../../helpers/helper";
 import Select from "../../components/form/Select";
-import { getSession } from "../../api/SessionRequest";
+import { getSessionBySchoolId } from "../../api/SessionRequest";
 import * as Yup from 'yup';
 import { getStandardBySchoolId } from "../../api/StandardRequest";
 import Checkbox from "../../components/form/input/Checkbox";
 import AlertConfirm from "../../components/custom/AlertConfirm";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { useUser } from "../../hooks/useUser";
 
 interface Enrolment {
     ENROLMENT_ID: string;
@@ -37,10 +38,12 @@ const Enrolment = () => {
     const [standards, setStandards] = useState<[]>([]);
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const { user } = useUser();
+    const canViewAllSchools = isAllSchoolsUser(user);
 
     // Restore filters from URL
     const initialFilters = {
-        school_id: searchParams.get("school_id")?.toString() || "",
+        school_id: searchParams.get("school_id")?.toString() || (canViewAllSchools ? "" : user?.SCHOOL_ID || ""),
         session_id: searchParams.get("session_id") || "",
         standard_id: searchParams.get("standard_id") || "",
         active: searchParams.get("active") === "true"
@@ -49,15 +52,15 @@ const Enrolment = () => {
     const fetchSchools = async () => {
         try {
             const response = await getSchool();
-            setSchools(response.data);
+            setSchools(filterSchoolsForUser(response.data || [], user) as []);
         } catch (error) {
             console.log(error);
         }
     };
 
-    const fetchSessions = async () => {
+    const fetchSessions = async (schoolId: any) => {
         try {
-            const response = await getSession();
+            const response = await getSessionBySchoolId(schoolId);
             setSessions(response.data);
         } catch (error) {
             console.log(error);
@@ -104,7 +107,7 @@ const Enrolment = () => {
 
     useEffect(() => {
         if (initialFilters.school_id) {
-            fetchSessions();
+            fetchSessions(initialFilters.school_id);
             fetchStandards(initialFilters.school_id);
         }
     }, [initialFilters.school_id]);
@@ -143,9 +146,9 @@ const Enrolment = () => {
         // { key: 'ENROLMENT_ID', header: 'ID', sortable: true },
         { key: 'student.NAME', header: 'Student Name', sortable: true },
         { key: 'DETAIL', header: 'Detail', sortable: true },
-        {   
+        {
             key: 'CREATED_AT',
-            header: 'Created At', 
+            header: 'Created At',
             sortable: true,
             render: (row: any) => new Date(row.CREATED_AT).toLocaleDateString([], { hour: "2-digit", minute: "2-digit" })
         },
@@ -156,39 +159,39 @@ const Enrolment = () => {
             render: (row: any) => {
                 return <>
                     <Formik
-                    initialValues={{
-                        enrolment_id: row.ENROLMENT_ID,
-                        active: row.ACTIVE
-                    }}
-                    enableReinitialize={true}
-                    onSubmit={async (values) => {
-                        try {
-                            const response = await API.toggleActive(values);
-                            console.log(response)
-                            Alert({status: true, text: response.data?.message || 'Status updated...'})
-                        } catch (error) {
-                            console.log(error)
-                        }
-                    }}
+                        initialValues={{
+                            enrolment_id: row.ENROLMENT_ID,
+                            active: row.ACTIVE
+                        }}
+                        enableReinitialize={true}
+                        onSubmit={async (values) => {
+                            try {
+                                const response = await API.toggleActive(values);
+                                console.log(response)
+                                Alert({ status: true, text: response.data?.message || 'Status updated...' })
+                            } catch (error) {
+                                console.log(error)
+                            }
+                        }}
                     >
                         {
-                            ({setFieldValue, submitForm, values}) => {
+                            ({ setFieldValue, submitForm, values }) => {
                                 return <Form>
                                     <div className="form-switch">
-                                        <input 
-                                        type="checkbox" 
-                                        name="active"
-                                        checked={Boolean(values.active)} 
-                                        className="form-switch-input" 
-                                        onChange={
-                                            (e) => {
-                                                setFieldValue('active', e.target.checked ? 1 : 0);
-                                                submitForm();
+                                        <input
+                                            type="checkbox"
+                                            name="active"
+                                            checked={Boolean(values.active)}
+                                            className="form-switch-input"
+                                            onChange={
+                                                (e) => {
+                                                    setFieldValue('active', e.target.checked ? 1 : 0);
+                                                    submitForm();
+                                                }
                                             }
-                                        }
                                         />
                                         <div className="form-switch-toggle"></div>
-                                        
+
                                     </div>
                                 </Form>
                             }
@@ -203,7 +206,7 @@ const Enrolment = () => {
             key: 'ACTIONS',
             header: 'Actions',
             render: (row: any) => (
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap space-x-2">
                     <button
                         className="text-blue-600 hover:underline text-sm"
                         onClick={() => {
@@ -229,8 +232,9 @@ const Enrolment = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <MainHeading>All Enrolments</MainHeading>
+            <div className="flex flex-wrap justify-between items-center">
+                <PageBreadcrumb pageTitle="Enrolments" />
+
 
                 <Link to="/enrolment/promote/class" className="ms-auto me-2">
                     <Button size="sm" variant="primary">
@@ -264,7 +268,7 @@ const Enrolment = () => {
                                     label="Select School"
                                     options={schoolOptions}
                                     onChange={(schoolId: any) => {
-                                        fetchSessions();
+                                        fetchSessions(schoolId);
                                         fetchStandards(schoolId);
                                         setFieldValue("school_id", schoolId);
                                     }}
@@ -295,7 +299,7 @@ const Enrolment = () => {
                                     name="active"
                                     label="Active"
                                     checked={values.active}
-                                    onChange={(checked) => setFieldValue("active", checked)}
+                                    onChange={(e: any) => setFieldValue("active", e.target.checked)}
                                 />
                             </div>
                         </div>

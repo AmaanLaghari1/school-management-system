@@ -8,8 +8,9 @@ import Select from "../../../components/form/Select";
 import { getFeeCategory } from "../../../api/FeeCategory";
 import { mapOptions } from "../../../helpers/helper";
 import { getSession } from "../../../api/SessionRequest";
-import { getStandardBySchoolId } from "../../../api/StandardRequest";
+import { getStandard, getStandardBySchoolId } from "../../../api/StandardRequest";
 import { useSelector } from "react-redux";
+import { isAllSchoolsUser } from "../../../helpers/helper";
 
 // Define props interface
 interface FormProps {
@@ -34,6 +35,7 @@ const FeeListForm: FC<FormProps> = ({
     const [sessions, setSessions] = useState<[]>([])
     const [standards, setStandards] = useState<[]>([])
     const user = useSelector((state:any) => state.auth?.authData.user)
+    const canViewAllSchools = isAllSchoolsUser(user)
 
     const fetchCategory = async () => {
         try {
@@ -63,7 +65,9 @@ const FeeListForm: FC<FormProps> = ({
 
     const fetchStandards = async () => {
         try {
-            const response = await getStandardBySchoolId(user.SCHOOL_ID)
+            const response = canViewAllSchools
+                ? await getStandard()
+                : await getStandardBySchoolId(user.SCHOOL_ID)
             // console.log(response)
             setStandards(response.data || [])
         }

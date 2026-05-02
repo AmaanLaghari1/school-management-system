@@ -37,3 +37,17 @@ export const deleteFeeVoucher = (formdata: {}) => API.post('delete', formdata, {
         "Content-Type": "application/json"
     }
 })
+
+export const downloadVoucher = (formdata: {}) => API.post('test-pdf', formdata, {
+    responseType: 'blob',
+    headers: {
+        "Content-Type": "application/json"
+    }
+})
+
+export const downloadFeeVouchers = (formdata: {}) => API.post('test-pdf', formdata, {
+    responseType: 'blob',
+    headers: {
+        "Content-Type": "application/json"
+    }
+})

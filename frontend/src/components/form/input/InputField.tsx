@@ -16,6 +16,7 @@ interface InputProps {
   required?: boolean;
   hint?: string;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -73,6 +74,11 @@ const Input: React.FC<InputProps> = ({
         {...props}
         onInput={(e) => {
           if(props.onInput) props.onInput(e)
+
+          field.onChange(e)
+        }}
+        onChange={(e) => {
+          if(props.onChange) props.onChange(e)
 
           field.onChange(e)
         }}

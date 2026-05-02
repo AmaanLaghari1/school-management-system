@@ -13,7 +13,7 @@ class EnrolmentController extends Controller
     //
     public function index(){
         try {
-            $record = Enrolment::with(['student', 'session', 'standard', 'standard.school'])->get();
+            $record = Enrolment::with(['student', 'session', 'standard', 'standard.school', 'fee_voucher'])->get();
 
             return response()->json($record, 200);
         }
@@ -182,7 +182,6 @@ class EnrolmentController extends Controller
             $records = Enrolment::where('STANDARD_ID', $request->previous_standard_id)
                 ->where('SESSION_ID', $request->previous_session_id)
                 ->where('ACTIVE', 1)   // Only active enrolments
-                    ->orderBy('YEAR', 'DESC')
                 ->get();
 
             if ($records->isEmpty()) {
@@ -242,23 +241,28 @@ class EnrolmentController extends Controller
         }
     }
 
-    public function getEnrolmentBySchoolId($schoolId){
+    public function getEnrolmentByFilters($sessionId, $standardId)
+    {
         try {
             $record = Enrolment::with([
                 'student:STUDENT_ID,NAME',
                 'session',
-                'standard:STANDARD_ID,SCHOOL_ID,STANDARD_NAME'
+                'standard:STANDARD_ID,SCHOOL_ID,STANDARD_NAME',
+                'fee_voucher'
             ])
-                ->whereHas('standard', function ($query) use ($schoolId) {
-                    $query->where('STANDARD_ID', $schoolId);
+                ->whereHas('standard', function ($query) use ($standardId) {
+                    $query->where('STANDARD_ID', $standardId);
+                })
+                ->whereHas('session', function ($query) use ($sessionId) {
+                    $query->where('SESSION_ID', $sessionId);
                 })
                 ->get();
 
             return response()->json($record, 200);
-        }
-        catch (\Exception $e) {
-            return response()->json(['error_message' => $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error_message' => $e->getMessage()
+            ], 500);
         }
     }
-
 }

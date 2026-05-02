@@ -4,6 +4,9 @@ import DataTable , {Column} from "../../components/custom/DataTable";
 import Button from "../../components/ui/button/Button";
 import { Link, useNavigate } from "react-router";
 import Alert from "../../components/custom/Alert";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { useUser } from "../../hooks/useUser";
+import { filterSchoolsForUser } from "../../helpers/helper";
 
 interface School {
   SCHOOL_ID: string;
@@ -18,11 +21,12 @@ interface School {
 const SchoolPage = () => {
   const [schools, setSchools] = useState<School[]>([]);
   const navigate = useNavigate()
+  const { user } = useUser()
 
   const fetchData = async () => {
     try {
       const response = await getSchool();
-      setSchools(response.data);
+      setSchools(filterSchoolsForUser(response.data || [], user));
     } catch (error) {
       console.error("Failed to fetch schools", error);
     }
@@ -55,7 +59,7 @@ const SchoolPage = () => {
     key: "ACTIONS",
     header: "Actions",
     render: (row) => (
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap space-x-2">
         <button className="text-blue-600 hover:underline text-sm"
         onClick={ () => {
           navigate('/school/edit', {
@@ -74,8 +78,8 @@ const SchoolPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">All Schools</h2>
+      <div className="flex flex-wrap justify-between items-center">
+        <PageBreadcrumb pageTitle="Schools" />
         <Link to="/school/add">
           <Button size="sm" variant="primary">
             Add New +

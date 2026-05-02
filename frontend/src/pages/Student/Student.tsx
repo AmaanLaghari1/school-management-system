@@ -1,16 +1,16 @@
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { deleteSchool, getSchool } from "../../api/SchoolRequest";
 import DataTable, { Column } from "../../components/custom/DataTable";
 import Button from "../../components/ui/button/Button";
 import { Link, useNavigate } from "react-router";
 import Alert from "../../components/custom/Alert";
-import { getStudentBySchoolId } from "../../api/StudentRequest";
-import { mapOptions } from "../../helpers/helper";
+import { getStudent, getStudentBySchoolId } from "../../api/StudentRequest";
+import { filterSchoolsForUser, isAllSchoolsUser, mapOptions } from "../../helpers/helper";
 import { Formik, Form } from "formik";
-import * as Yup from 'yup'
 import Select from "../../components/form/Select";
 import AlertConfirm from "../../components/custom/AlertConfirm";
 import { useUser } from "../../hooks/useUser";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 
 interface Student {
   STUDENT_ID: string;
@@ -28,27 +28,29 @@ const Student = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [schools, setSchools] = useState<[]>([])
   const navigate = useNavigate()
-  const {user} = useUser();
+  const { user } = useUser();
+  const canViewAllSchools = isAllSchoolsUser(user);
 
   const fetchSchools = async () => {
     try {
       const response = await getSchool()
-      // console.log(response)
-      setSchools(response.data.filter((school: any) => school.SCHOOL_ID === user.SCHOOL_ID));
+      setSchools(filterSchoolsForUser(response.data || [], user) as [])
     } catch (error: any) {
       console.log(error)
     }
   }
 
   const schoolOptions = useMemo(() => {
-    return mapOptions(schools, 'SCHOOL_NAME', 'SCHOOL_ID')
-  }, [schools])
+    const options = mapOptions(schools, 'SCHOOL_NAME', 'SCHOOL_ID')
+    return canViewAllSchools ? [{ label: 'All Schools', value: '' }, ...options] : options
+  }, [schools, canViewAllSchools])
 
-  const fetchData = async (id: '') => {
+  const fetchData = async (id: any) => {
     setLoading(true)
     try {
-      const response = await getStudentBySchoolId(id);
-      //   console.log(response)
+      const response = canViewAllSchools && !id
+        ? await getStudent()
+        : await getStudentBySchoolId(id);
       setStudents(response.data);
     } catch (error) {
       console.error("Failed to fetch students", error);
@@ -70,7 +72,8 @@ const Student = () => {
 
   useEffect(() => {
     fetchSchools();
-  }, []);
+    fetchData(canViewAllSchools ? '' : user?.SCHOOL_ID);
+  }, [user?.SCHOOL_ID]);
 
   const columns: Column<Student>[] = [
     // { key: "STUDENT_ID", header: "ID", sortable: true },
@@ -85,7 +88,7 @@ const Student = () => {
       key: "ACTIONS",
       header: "Actions",
       render: (row) => (
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap space-x-2">
           <button className="text-blue-600 hover:underline text-sm"
             onClick={() => {
               navigate('/student/edit', {
@@ -100,10 +103,11 @@ const Student = () => {
             async () => {
               const confirm = await AlertConfirm({
                 title: 'Are you sure?',
-                text: 'Do you really want to delete this student? This process cannot be undone.',})
-                if(confirm){
-                  handleDelete(row.STUDENT_ID)
-                }
+                text: 'Do you really want to delete this student? This process cannot be undone.',
+              })
+              if (confirm) {
+                handleDelete(row.STUDENT_ID)
+              }
             }
           } className="text-red-600 hover:underline text-sm">Delete</button>
         </div>
@@ -112,14 +116,19 @@ const Student = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
+      <div className="flex flex-wrap justify-between items-center">
+        <PageBreadcrumb pageTitle="Students" />
+        <Link to="/student/add">
+          <Button size="sm" variant="primary">
+            Add New +
+          </Button>
+        </Link>
+      </div>
       <Formik
         initialValues={{
-          'school_id': user.SCHOOL_ID || ''
+          'school_id': canViewAllSchools ? '' : user.SCHOOL_ID || ''
         }}
-        validationSchema={Yup.object().shape({
-          school_id: Yup.string().required('Please select school!')
-        })}
         onSubmit={(values: any) => {
           fetchData(values.school_id)
         }}
@@ -133,7 +142,7 @@ const Student = () => {
             }, []);
 
             return <Form>
-              <div className="flex items-end">
+              <div className="flex flex-wrap items-end">
                 <div className="w-md mx-2">
                   <Select
                     name="school_id"
@@ -160,15 +169,6 @@ const Student = () => {
       {
         students.length > 0 &&
         <>
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">All Students</h2>
-            <Link to="/student/add">
-              <Button size="sm" variant="primary">
-                Add New +
-              </Button>
-            </Link>
-          </div>
-
           <div style={{ width: '100%', overflow: "hidden" }}>
             <DataTable data={students} columns={columns} itemsPerPage={10} />
           </div>

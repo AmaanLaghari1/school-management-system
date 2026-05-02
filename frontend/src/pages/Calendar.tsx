@@ -150,7 +150,7 @@ const Calendar: React.FC = () => {
           onClose={closeModal}
           className="max-w-[700px] p-6 lg:p-10"
         >
-          <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+          <div className="flex flex-wrap flex-col px-2 overflow-y-auto custom-scrollbar">
             <div>
               <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
                 {selectedEvent ? "Edit Event" : "Add Event"}
@@ -186,7 +186,7 @@ const Calendar: React.FC = () => {
                         className={`form-check form-check-${value} form-check-inline`}
                       >
                         <label
-                          className="flex items-center text-sm text-gray-700 form-check-label dark:text-gray-400"
+                          className="flex flex-wrap items-center text-sm text-gray-700 form-check-label dark:text-gray-400"
                           htmlFor={`modal${key}`}
                         >
                           <span className="relative">
@@ -199,7 +199,7 @@ const Calendar: React.FC = () => {
                               checked={eventLevel === key}
                               onChange={() => setEventLevel(key)}
                             />
-                            <span className="flex items-center justify-center w-5 h-5 mr-2 border border-gray-300 rounded-full box dark:border-gray-700">
+                            <span className="flex flex-wrap items-center justify-center w-5 h-5 mr-2 border border-gray-300 rounded-full box dark:border-gray-700">
                               <span
                                 className={`h-2 w-2 rounded-full bg-white ${
                                   eventLevel === key ? "block" : "hidden"
@@ -245,18 +245,18 @@ const Calendar: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
+            <div className="flex flex-wrap items-center gap-3 mt-6 modal-footer sm:justify-end">
               <button
                 onClick={closeModal}
                 type="button"
-                className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+                className="flex flex-wrap w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
               >
                 Close
               </button>
               <button
                 onClick={handleAddOrUpdateEvent}
                 type="button"
-                className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
+                className="btn btn-success btn-update-event flex flex-wrap w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
               >
                 {selectedEvent ? "Update Changes" : "Add Event"}
               </button>
@@ -272,7 +272,7 @@ const renderEventContent = (eventInfo: any) => {
   const colorClass = `fc-bg-${eventInfo.event.extendedProps.calendar.toLowerCase()}`;
   return (
     <div
-      className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm`}
+      className={`event-fc-color flex flex-wrap fc-event-main ${colorClass} p-1 rounded-sm`}
     >
       <div className="fc-daygrid-event-dot"></div>
       <div className="fc-event-time">{eventInfo.timeText}</div>

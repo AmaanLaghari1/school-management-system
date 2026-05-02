@@ -17,7 +17,9 @@ class FeeVoucher extends Model
         'SCHOOL_ID',
         'DATE',
         'FEE_MONTH',
-        'TOTAL_AMOUNT',
+        'CURRENT_AMOUNT',
+        'PAYABLE_AMOUNT',
+        'DUES_AMOUNT',
         'ACTIVE',
         'REMARKS'
     ];
@@ -28,5 +30,9 @@ class FeeVoucher extends Model
 
     public function school(){
         return $this->belongsTo(School::class, 'SCHOOL_ID');
+    }
+
+    public function details(){
+        return $this->hasMany(FeeVoucherDetail::class, 'VOUCHER_ID');
     }
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import SubHeading from '../../../components/custom/SubHeading'
 import FeeLedgerForm from './FeeLedgerForm'
 import * as Yup from 'yup'
-import * as API from '../../../api/FeeList'
+import * as API from '../../../api/FeeLedger'
 import Alert from '../../../components/custom/Alert'
 
 interface FeeListAddProps {
@@ -10,11 +10,11 @@ interface FeeListAddProps {
     fetchData: any;
 }
 
-const FeeListAdd = ({ closeModal, fetchData }: FeeListAddProps) => {
+const FeeLedgerAdd = ({ closeModal, fetchData }: FeeListAddProps) => {
     const [loading, setLoading] = useState(false)
     const initialValues = {
         voucher_id: '',
-        student_name: '',
+        student_id: '',
         detail: '',
         date: '',
         voucher_amount: '',
@@ -22,8 +22,8 @@ const FeeListAdd = ({ closeModal, fetchData }: FeeListAddProps) => {
         remarks: ''
     }
     const validationSchema = Yup.object().shape({
-        voucher_id: Yup.string().required('Required!'),
-        student_name: Yup.string().required('Required!'),
+        // voucher_id: Yup.string().required('Required!'),
+        student_id: Yup.string().required('Required!'),
         detail: Yup.string().required('Required!'),
         date: Yup.string().required('Required!'),
         voucher_amount: Yup.number().required('Required!').positive('Amount must be a positive number!'),
@@ -33,7 +33,7 @@ const FeeListAdd = ({ closeModal, fetchData }: FeeListAddProps) => {
     const handleSubmit = async (values: {}) => {
         setLoading(true)
         try {
-            const response = await API.createFeeList(values)
+            const response = await API.createFeeLedger(values)
             console.log(response.data)
             closeModal()
             fetchData()
@@ -65,4 +65,4 @@ const FeeListAdd = ({ closeModal, fetchData }: FeeListAddProps) => {
   )
 }
 
-export default React.memo(FeeListAdd)
+export default React.memo(FeeLedgerAdd)

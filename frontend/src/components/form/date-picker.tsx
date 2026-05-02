@@ -16,6 +16,7 @@ type PropsType = {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  required?: boolean;
 };
 
 export default function DatePicker({
@@ -27,6 +28,7 @@ export default function DatePicker({
   placeholder = "Select a date",
   className = "",
   disabled = false,
+  required = false,
 }: PropsType) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [field, meta] = useField(name);
@@ -38,15 +40,16 @@ export default function DatePicker({
     const fp = flatpickr(inputRef.current, {
       mode,
       static: true,
+      appendTo: document.body, // key fix
       monthSelectorType: "static",
       dateFormat: "Y-m-d",
       defaultDate: field.value || defaultDate,
+      disableMobile: true, // key fix
 
       onChange: (selectedDates, dateStr) => {
         if (mode === "single") {
           setFieldValue(name, dateStr || "");
         } else {
-          // For multiple / range
           const formatted = selectedDates.map((d) =>
             fp.formatDate(d, "Y-m-d")
           );
@@ -58,16 +61,19 @@ export default function DatePicker({
     return () => {
       fp.destroy();
     };
-  }, [mode, name, setFieldValue, defaultDate]);
+  }, [mode, name, setFieldValue, defaultDate, field.value]);
 
   const error = meta.touched && meta.error;
 
   return (
-    <div>
+    <div className="w-full">
       {label && (
         <Label className="mt-3" htmlFor={id}>
           {label}
-        </Label>
+          {
+            required && <span className="text-error-500">*</span>
+          }
+        </Label> 
       )}
 
       <div className="relative">
@@ -78,7 +84,7 @@ export default function DatePicker({
           name={name}
           placeholder={placeholder}
           disabled={disabled}
-          className={`h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800 ${className}`}
+          className={`h-11 sm:h-12 w-full rounded-lg border appearance-none px-3 sm:px-4 py-2.5 text-sm sm:text-base shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-2 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800 ${className}`}
         />
 
         <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">

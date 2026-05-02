@@ -26,7 +26,7 @@ export const getEnrolmentById = (id: '') => API.get('/get/' + id, {
     }
 })
 
-export const getEnrolmentBySchoolId = (id: '') => API.get('/get_by_school/' + id, {
+export const getEnrolmentByFilters = (session_id: '', standard_id: '') => API.get('/get_by_filters/' + session_id +'/'+standard_id, {
     headers: {
         "Content-Type": "application/json"
     }

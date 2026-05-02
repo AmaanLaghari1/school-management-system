@@ -8,6 +8,8 @@ import FeeCategoryAdd from "./FeeCategoryAdd";
 import FeeCategoryEdit from "./FeeCategoryEdit";
 import { useModal } from "../../../hooks/useModal";
 import Switch from "../../../components/form/switch/Switch";
+import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
+import { Modal } from "../../../components/ui/modal";
 
 interface FeeCategory {
     FEE_CAT_ID: string;
@@ -52,17 +54,17 @@ const FeeCategory = () => {
         try {
             const response = await API.updateFeeCategory(values)
             fetchCategory()
-        } catch (error:any) {
+        } catch (error: any) {
             console.log(error)
         }
     }
 
     const columns: Column<FeeCategory>[] = [
-        {
-            key: 'FEE_CAT_ID',
-            header: 'ID',
-            sortable: true
-        },
+        // {
+        //     key: 'FEE_CAT_ID',
+        //     header: 'ID',
+        //     sortable: true
+        // },
         {
             key: 'CAT_TITLE',
             header: 'Title',
@@ -72,16 +74,16 @@ const FeeCategory = () => {
             key: 'ACTIVE',
             header: 'Active',
             sortable: true,
-            render: (row:any) => {
+            render: (row: any) => {
                 return (
                     <div>
-                        <Switch label="" defaultChecked={row.ACTIVE == 1} 
-                        onChange={() => toggleActive({
-                            fee_cat_id: row.FEE_CAT_ID,
-                            remarks: row.REMARKS,
-                            cat_title: row.CAT_TITLE,
-                            active: row.ACTIVE == 1 ? 0 : 1
-                        })}
+                        <Switch label="" defaultChecked={row.ACTIVE == 1}
+                            onChange={() => toggleActive({
+                                fee_cat_id: row.FEE_CAT_ID,
+                                remarks: row.REMARKS,
+                                cat_title: row.CAT_TITLE,
+                                active: row.ACTIVE == 1 ? 0 : 1
+                            })}
                         />
                     </div>
                 )
@@ -98,7 +100,7 @@ const FeeCategory = () => {
             header: 'Actions',
             render: (row: any) => {
                 return (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap space-x-2">
                         <button className="text-blue-600 hover:underline text-sm"
                             onClick={() => {
                                 setPrevValues(row)
@@ -138,11 +140,11 @@ const FeeCategory = () => {
         fetchCategory()
     }, [])
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">All Fee Categories</h2>
+        <div className="space-y-2">
+            <div className="flex flex-wrap justify-between items-center">
+                <PageBreadcrumb pageTitle="Fee Categories" />
                 <Button size="sm" variant="primary"
-                onClick={() => addModal.openModal()}
+                    onClick={() => addModal.openModal()}
                 >
                     Add New +
                 </Button>
@@ -152,30 +154,16 @@ const FeeCategory = () => {
 
             {
                 addModal.isOpen &&
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} />
-                        <div className="flex justify-end gap-2 mt-4">
-                            <Button variant="secondary" onClick={() => addModal.closeModal()}>
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                <Modal isOpen={addModal.isOpen} onClose={addModal.closeModal} showCloseButton={true} className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} />
+                </Modal>
             }
 
             {
                 editModal.isOpen &&
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeCategoryEdit fetchData={fetchCategory} closeModal={editModal.closeModal} prevValues={prevValues} />
-                        <div className="flex justify-end gap-2 mt-4">
-                            <Button variant="secondary" onClick={() => editModal.closeModal()}>
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                <Modal isOpen={editModal.isOpen} onClose={editModal.closeModal} showCloseButton={true} className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <FeeCategoryEdit fetchData={fetchCategory} closeModal={editModal.closeModal} prevValues={prevValues} />
+                </Modal>
             }
         </div>
 

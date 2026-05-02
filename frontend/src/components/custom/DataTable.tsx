@@ -84,7 +84,7 @@ const DataTable = <T extends object>({
   return (
     <div className="w-full">
       {/* 🔍 Search Input */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
+      <div className="flex flex-wrap flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
         <input
           type="text"
           placeholder={searchPlaceholder}
@@ -102,7 +102,7 @@ const DataTable = <T extends object>({
         <table className="min-w-full text-sm sm:text-base divide-y divide-gray-200 dark:divide-gray-600">
           <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
-              <th className="p-3">#</th>
+              <th className="p-3 dark:text-white">#</th>
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -111,7 +111,7 @@ const DataTable = <T extends object>({
                     column.sortable ? "cursor-pointer select-none" : ""
                   } ${column.className || ""}`}
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-1">
                     {column.header}
                     {column.sortable && sortConfig?.key === column.key && (
                       sortConfig.direction === "asc" ? (
@@ -132,7 +132,7 @@ const DataTable = <T extends object>({
                   key={rowIndex}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <td align="center">{rowIndex+1}</td>
+                  <td align="center" className="dark:text-white">{rowIndex+1}</td>
                   {columns.map((column) => (
                     <td
                       key={column.key}
@@ -161,11 +161,11 @@ const DataTable = <T extends object>({
 
       {/* 📄 Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-4 text-sm text-gray-700 dark:text-gray-300 gap-2">
+        <div className="flex flex-wrap flex-col sm:flex-row justify-between items-center mt-4 text-sm text-gray-700 dark:text-gray-300 gap-2">
           <p className="text-center sm:text-left">
             Page {currentPage} of {totalPages}
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}

@@ -13,7 +13,7 @@ class SessionController extends Controller
     //
     public function index(){
         try {
-            $records = Session::orderBy('YEAR', 'DESC')->get();
+            $records = Session::with(['school'])->orderBy('YEAR', 'DESC')->get();
             return response()->json($records, 200);
         }
         catch (\Exception $e) {
@@ -130,7 +130,7 @@ class SessionController extends Controller
 
     public function getSessionBySchoolId ($schoolId){
         try {
-            $records = Session::where('SCHOOL_ID', $schoolId)->get();
+            $records = Session::with('school')->where('SCHOOL_ID', $schoolId)->get();
 
             return response()->json($records, 200);
         }

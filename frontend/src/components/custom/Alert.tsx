@@ -13,6 +13,9 @@ const Alert: React.FC<AlertProps> = ({ status, text }) => {
         text: text,
         showConfirmButton: false,
         timer: 3000, // Auto-close after 3 seconds
+        didOpen: (popup) => {
+            popup.style.zIndex = '99999';
+        },
     });
 
     return null; // No need to return JSX

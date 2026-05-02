@@ -11,8 +11,10 @@ use App\Http\Controllers\API\SessionController;
 use App\Http\Controllers\API\StudentController;
 use App\Http\Controllers\API\GuardianRelationController;
 use App\Http\Controllers\API\EnrolmentController;
+use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PdfController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -57,6 +59,15 @@ Route::prefix('student')->group(function () {
     Route::delete('delete/{id}', [StudentController::class, 'destroy']);
 });
 
+Route::prefix('user')->group(function () {
+    Route::get('get', [UserController::class, 'index']);
+    Route::get('get/{id}', [UserController::class, 'show']);
+    Route::get('get_by_school/{schoolId}', [UserController::class, 'getBySchoolId']);
+    Route::post('add', [UserController::class, 'store']);
+    Route::put('edit/{id}', [UserController::class, 'update']);
+    Route::delete('delete/{id}', [UserController::class, 'destroy']);
+});
+
 Route::prefix('guardian')->group(function () {
     Route::get('get', [GuardianRelationController::class, 'index']);
     Route::get('get/{id}', [GuardianRelationController::class, 'show']);
@@ -82,7 +93,7 @@ Route::prefix('enrolment')->group(function () {
     Route::delete('delete/{id}', [EnrolmentController::class, 'destroy']);
     Route::post('promote', [EnrolmentController::class, 'promoteClass']);
     Route::post('toggle-active', [EnrolmentController::class, 'toggleActiveStatus']);
-    Route::get('get_by_school/{schoolId}', [EnrolmentController::class, 'getEnrolmentBySchoolId']);
+    Route::get('get_by_filters/{sessionId}/{standardId}', [EnrolmentController::class, 'getEnrolmentByFilters']);
 });
 
 Route::prefix('fee')->group(function () {
@@ -100,6 +111,7 @@ Route::prefix('fee')->group(function () {
         Route::post('post', [FeeListController::class, 'store']);
         Route::post('put', [FeeListController::class, 'update']);
         Route::post('delete', [FeeListController::class, 'destroy']);
+        Route::post('get_filtered', [FeeListController::class, 'getFilteredFeeList']);
     });
 
     Route::prefix('fee_ledger')->group(function () {
@@ -117,5 +129,9 @@ Route::prefix('fee')->group(function () {
         Route::post('post', [FeeVoucherController::class, 'store']);
         Route::post('put', [FeeVoucherController::class, 'update']);
         Route::post('delete', [FeeVoucherController::class, 'destroy']);
+        Route::post('/test-pdf', [PdfController::class, 'testPDF']);
+
     });
 });
+
+

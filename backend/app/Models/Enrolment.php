@@ -45,4 +45,8 @@ class Enrolment extends Model
     public function standard(){
         return $this->belongsTo(Standard::class, 'STANDARD_ID');
     }
+
+    public function fee_voucher(){
+        return $this->hasMany(FeeVoucher::class, 'ENROLMENT_ID');
+    }
 }

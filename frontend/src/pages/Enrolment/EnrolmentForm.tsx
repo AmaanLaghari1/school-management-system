@@ -6,10 +6,11 @@ import * as Yup from "yup";
 import { FC, useEffect, useMemo, useState } from "react";
 import Select from "../../components/form/Select";
 import { getStudent, getStudentBySchoolId } from "../../api/StudentRequest";
-import { getSession } from "../../api/SessionRequest";
+import { getSession, getSessionBySchoolId } from "../../api/SessionRequest";
 import { getStandard, getStandardBySchoolId } from "../../api/StandardRequest";
-import { mapOptions } from "../../helpers/helper";
+import { filterSchoolsForUser, isAllSchoolsUser, mapOptions } from "../../helpers/helper";
 import { getSchool } from "../../api/SchoolRequest";
+import { useUser } from "../../hooks/useUser";
 
 // Define props interface
 interface FormProps {
@@ -34,6 +35,8 @@ const EnrolmentForm: FC<FormProps> = ({
     const [students, setStudents] = useState<[]>([])
     const [standards, setStandards] = useState<[]>([])
     const [sessions, setSessions] = useState<[]>([])
+    const { user } = useUser()
+    const canViewAllSchools = isAllSchoolsUser(user)
 
     const fetchData = async () => {
         try {
@@ -55,15 +58,17 @@ const EnrolmentForm: FC<FormProps> = ({
     const fetchSchools = async () => {
         try {
             const response = await getSchool()
-            setSchools(response.data)
+            setSchools(filterSchoolsForUser(response.data || [], user) as [])
         } catch (error) {
             console.log(error)
         }
     }
 
-    const fetchSessions = async () => {
+    const fetchSessions = async (schoolId?: any) => {
         try {
-            const response = await getSession()
+            const response = schoolId
+                ? await getSessionBySchoolId(schoolId)
+                : await getSession()
             setSessions(response.data)
         } catch (error) {
             console.log(error)
@@ -94,7 +99,7 @@ const EnrolmentForm: FC<FormProps> = ({
 
     useEffect(() => {
         fetchSchools()
-        fetchSessions()
+        fetchSessions(canViewAllSchools ? undefined : user?.SCHOOL_ID)
     }, [])
 
     const studentOptions = useMemo(() => {
@@ -137,6 +142,7 @@ const EnrolmentForm: FC<FormProps> = ({
                                 options={schoolOptions}
                                 onChange={(e) => {
                                     setFieldValue('school_id', e)
+                                    fetchSessions(e)
                                     fetchStudents(e)
                                     fetchStandards(e)
                                 }}

@@ -6,7 +6,8 @@ import Button from "../../components/ui/button/Button";
 import { BoxIcon } from "lucide-react";
 import Select from "../../components/form/Select";
 import { getSchool } from "../../api/SchoolRequest";
-import { mapOptions } from "../../helpers/helper";
+import { filterSchoolsForUser, mapOptions } from "../../helpers/helper";
+import { useUser } from "../../hooks/useUser";
 
 interface FormProps {
     initialValues: { [key: string]: any };
@@ -21,10 +22,11 @@ interface FormProps {
 
 const StandardForm: FC<FormProps> = ({ initialValues, validationSchema, handleSubmit, loading }) => {
     const [schools, setSchools] = useState<any>([])
+    const { user } = useUser()
     const fetchSchools = async () => {
         try {
             const response = await getSchool()
-            setSchools(response.data)
+            setSchools(filterSchoolsForUser(response.data || [], user))
         } catch (error) {
             console.log(error)
         }

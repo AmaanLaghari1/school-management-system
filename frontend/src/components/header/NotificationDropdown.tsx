@@ -22,15 +22,15 @@ export default function NotificationDropdown() {
   return (
     <div className="relative">
       <button
-        className="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full dropdown-toggle hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+        className="relative flex flex-wrap items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full dropdown-toggle hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
         onClick={handleClick}
       >
         <span
           className={`absolute right-0 top-0.5 z-10 h-2 w-2 rounded-full bg-orange-400 ${
-            !notifying ? "hidden" : "flex"
+            !notifying ? "hidden" : "flex flex-wrap"
           }`}
         >
-          <span className="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>
+          <span className="absolute inline-flex flex-wrap w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>
         </span>
         <svg
           className="fill-current"
@@ -50,9 +50,9 @@ export default function NotificationDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
+        className="absolute -right-[240px] mt-[17px] flex flex-wrap h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
       >
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
+        <div className="flex flex-wrap items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
           <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
             Notification
           </h5>
@@ -76,12 +76,12 @@ export default function NotificationDropdown() {
             </svg>
           </button>
         </div>
-        <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
+        <ul className="flex flex-wrap flex-col h-auto overflow-y-auto custom-scrollbar">
           {/* Example notification items */}
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -105,7 +105,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>5 min ago</span>
@@ -117,7 +117,7 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -141,7 +141,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>8 min ago</span>
@@ -153,7 +153,7 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -177,7 +177,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>15 min ago</span>
@@ -189,7 +189,7 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
               to="/"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
@@ -214,7 +214,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>1 hr ago</span>
@@ -225,7 +225,7 @@ export default function NotificationDropdown() {
 
           <li>
             <DropdownItem
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
               onItemClick={closeDropdown}
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
@@ -250,7 +250,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>5 min ago</span>
@@ -262,7 +262,7 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -286,7 +286,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>8 min ago</span>
@@ -298,7 +298,7 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -322,7 +322,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>15 min ago</span>
@@ -334,7 +334,7 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className="flex flex-wrap gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -358,7 +358,7 @@ export default function NotificationDropdown() {
                   </span>
                 </span>
 
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                <span className="flex flex-wrap items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>1 hr ago</span>

@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router";
 import * as API from '../../api/StandardRequest'
 import DataTable, { Column } from "../../components/custom/DataTable";
@@ -7,8 +7,10 @@ import Alert from "../../components/custom/Alert";
 import Select from "../../components/form/Select";
 import { Form, Formik } from "formik";
 import { getSchool } from "../../api/SchoolRequest";
-import { mapOptions } from "../../helpers/helper";
+import { filterSchoolsForUser, isAllSchoolsUser, mapOptions } from "../../helpers/helper";
 import AlertConfirm from "../../components/custom/AlertConfirm";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { useUser } from "../../hooks/useUser";
 
 interface Standard {
     STANDARD_ID: string;
@@ -25,25 +27,29 @@ const Standard = () => {
     const [standards, setStandards] = useState<Standard[]>([])
     const [schools, setSchools] = useState<[]>([])
     const navigate = useNavigate()
+    const { user } = useUser()
+    const canViewAllSchools = isAllSchoolsUser(user)
 
     const fetchSchools = async () => {
         try {
             const response = await getSchool()
-            console.log(response)
-            setSchools(response.data)
+            setSchools(filterSchoolsForUser(response.data || [], user) as [])
         } catch (error: any) {
             console.log(error)
         }
     }
 
     const schoolOptions = useMemo(() => {
-        return mapOptions(schools, 'SCHOOL_NAME', 'SCHOOL_ID')
-    }, [schools])
+        const options = mapOptions(schools, 'SCHOOL_NAME', 'SCHOOL_ID')
+        return canViewAllSchools ? [{ label: 'All Schools', value: '' }, ...options] : options
+    }, [schools, canViewAllSchools])
 
-    const fetchStandards = async (schoolId: '') => {
+    const fetchStandards = async (schoolId: any) => {
         setLoading(true)
         try {
-            const response = await API.getStandardBySchoolId(schoolId)
+            const response = canViewAllSchools && !schoolId
+                ? await API.getStandard()
+                : await API.getStandardBySchoolId(schoolId)
             setStandards(response.data)
             // console.log(response)
         } catch (error: any) {
@@ -71,11 +77,6 @@ const Standard = () => {
     }, [])
 
     const columns: Column<Standard>[] = [
-        // {
-        //     key: 'STANDARD_ID',
-        //     header: 'ID',
-        //     sortable: true
-        // },
         {
             key: 'school.SCHOOL_NAME',
             header: 'School Name',
@@ -101,7 +102,7 @@ const Standard = () => {
             header: 'Actions',
             render: (row: any) => {
                 return (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap space-x-2">
                         <button className="text-blue-600 hover:underline text-sm"
                             onClick={() => {
                                 navigate('/standard/edit', {
@@ -133,21 +134,27 @@ const Standard = () => {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex">
+        <div className="space-y-2">
+            <div className="flex flex-wrap justify-between items-center">
+                <PageBreadcrumb pageTitle="Standards" />
+                <Link to="/standard/add">
+                    <Button size="sm" variant="primary">
+                        Add New +
+                    </Button>
+                </Link>
+            </div>
+            <div className="flex flex-wrap">
                 <div className="w-md mx-2">
                     <Formik
                         initialValues={{
-                            school_id: 1
+                            school_id: canViewAllSchools ? '' : user?.SCHOOL_ID || ''
                         }}
                         onSubmit={handleSubmit}
                     >
                         {
-                            ({ setFieldValue, validateForm, submitForm, values }) => {
+                            ({ setFieldValue, validateForm, submitForm }) => {
                                 useEffect(() => {
-                                    if (values.school_id) {
-                                        submitForm();
-                                    }
+                                    submitForm();
                                 }, []);
                                 return (
                                     <Form>
@@ -175,15 +182,6 @@ const Standard = () => {
             {
                 standards.length > 0 &&
                 <>
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">All Standards</h2>
-                        <Link to="/standard/add">
-                            <Button size="sm" variant="primary">
-                                Add New +
-                            </Button>
-                        </Link>
-                    </div>
-
                     <DataTable data={standards} columns={columns} itemsPerPage={10} />
                 </>
             }

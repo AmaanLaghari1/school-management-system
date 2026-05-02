@@ -155,4 +155,36 @@ class FeeListController extends Controller
             ], 500);
         }
     }
+
+    public function getFilteredFeeList(Request $request)
+    {
+        try {
+            $validation = Validator::make($request->all(), [
+                'fee_cat_id' => 'required',
+                'session_id' => 'required',
+                'standard_id' => 'required'
+            ])->stopOnFirstFailure();
+
+            if ($validation->fails()) {
+                return response()->json([
+                    'message' => 'Validation Error!',
+                    'error_message' => $validation->errors()->first()
+                ], 401);
+            }
+
+            $records = FeeList::with(['fee_category', 'session', 'standard'])
+                ->where('FEE_CAT_ID', $request->fee_cat_id)
+                ->where('SESSION_ID', $request->session_id)
+                ->where('STANDARD_ID', $request->standard_id)
+                ->get();
+
+            return response()->json($records, 200);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Internal Server Error!',
+                'error_message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

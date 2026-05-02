@@ -9,8 +9,9 @@ import Radio from "../../components/form/input/Radio";
 import Label from "../../components/form/Label";
 import DatePicker from "../../components/form/date-picker";
 import { getSchool } from "../../api/SchoolRequest";
-import { mapOptions } from "../../helpers/helper";
+import { filterSchoolsForUser, mapOptions } from "../../helpers/helper";
 import { getGuardianRelation } from "../../api/StudentRequest";
+import { useUser } from "../../hooks/useUser";
 
 interface FormProps {
   initialValues: { [key: string]: any };
@@ -30,13 +31,14 @@ const StudentForm: FC<FormProps> = ({
 }) => {
   const [schools, setSchools] = useState<any>([]);
   const [guardianRelations, setGuardianRelations] = useState<any>([]);
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const schoolRes = await getSchool();
         const relationRes = await getGuardianRelation();
-        setSchools(schoolRes.data);
+        setSchools(filterSchoolsForUser(schoolRes.data || [], user));
         setGuardianRelations(relationRes.data);
       } catch (error) {
         console.log(error);
@@ -99,7 +101,7 @@ const StudentForm: FC<FormProps> = ({
                 <Label className="font-medium">
                   Gender<span className="text-error-500">*</span>
                 </Label>
-                <div className="flex gap-4 mt-2">
+                <div className="flex flex-wrap gap-4 mt-2">
                   <Radio id="male" name="gender" value="1" label="Male" />
                   <Radio id="female" name="gender" value="2" label="Female" />
                 </div>

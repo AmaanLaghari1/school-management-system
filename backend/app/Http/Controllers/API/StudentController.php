@@ -13,7 +13,9 @@ class StudentController extends Controller
     //
     public function index(){
         try {
-            $records = Student::with(['school', 'guardian'])->get();
+            $records = Student::with(['school', 'guardian'])
+                ->orderBy('STUDENT_ID', 'DESC')
+                ->get();
             return response()->json($records, 200);
         }
         catch (\Exception $e) {
@@ -38,7 +40,9 @@ class StudentController extends Controller
 
     public function getBySchoolId($schoolId){
         try {
-            $record = Student::with(['school', 'guardian'])->where('SCHOOL_ID', $schoolId)->get();
+            $record = Student::with(['school', 'guardian'])->where('SCHOOL_ID', $schoolId)
+                ->orderBy('STUDENT_ID', 'DESC')
+                ->get();
 
             if(!$record){
                 return response()->json(['error_message' => 'Record not found!'], 401);

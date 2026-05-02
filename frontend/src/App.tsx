@@ -27,13 +27,16 @@ import FeeList from "./pages/FeeManagement/FeeList/FeeList";
 import FeeLedger from "./pages/FeeManagement/FeeLedger/FeeLedger";
 import FeeVoucher from "./pages/FeeManagement/FeeVoucher/FeeVoucher";
 import UserProfiles from "./pages/UserProfiles";
+import Users from "./pages/Users/Users";
+import FeeVoucherAdd from "./pages/FeeManagement/FeeVoucher/FeeVoucherAdd";
+import FeeVoucherEdit from "./pages/FeeManagement/FeeVoucher/FeeVoucherEdit";
 
 export default function App() {
   const auth = useSelector((state:any) => state.auth?.authData)
   const token = auth?.token
   // console.log(auth)
 
-  const roles = useSelector((state:any) => state.roles?.allRoles)
+  // const roles = useSelector((state:any) => state.roles?.allRoles)
   // console.log(roles)
 
   return (
@@ -63,8 +66,11 @@ export default function App() {
             <Route index path="/fee/categories" element={<FeeCategory />} />
             <Route index path="/fee/lists" element={<FeeList />} />
             <Route index path="/fee/ledgers" element={<FeeLedger />} />
-            <Route index path="/fee/voucher" element={<FeeVoucher />} />
+            <Route index path="/fee/vouchers" element={<FeeVoucher />} />
+            <Route index path="/fee/voucher/add" element={<FeeVoucherAdd />} />
+            <Route index path="/fee/voucher/edit" element={<FeeVoucherEdit />} />
             <Route index path="/profile" element={<UserProfiles />} />
+            <Route path="/users" element={<Users />} />
           </Route>
 
           {/* Auth Layout */}

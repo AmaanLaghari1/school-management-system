@@ -31,3 +31,10 @@ export const deleteFeeList = (formdata: {}) => API.post('delete', formdata, {
         "Content-Type": "application/json"
     }
 })
+
+
+export const getFilteredFeelist = (formdata: {}) => API.post('get_filtered', formdata, {
+    headers: {
+        "Content-Type": "application/json"
+    }
+})

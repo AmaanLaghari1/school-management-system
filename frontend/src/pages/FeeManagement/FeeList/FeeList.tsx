@@ -8,6 +8,17 @@ import Switch from "../../../components/form/switch/Switch";
 import FeeListAdd from "./FeeListAdd";
 import FeeListEdit from "./FeeListEdit";
 import Alert from "../../../components/custom/Alert";
+import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
+import useDebounce from "../../../hooks/useDebounce";
+import { useQuery } from "@tanstack/react-query";
+import { getSession, getSessionBySchoolId } from "../../../api/SessionRequest";
+import { useSelector } from "react-redux";
+import { getStandard, getStandardBySchoolId } from "../../../api/StandardRequest";
+import { getFeeCategory } from "../../../api/FeeCategory";
+import { Formik, Form } from "formik";
+import Select from "../../../components/form/Select";
+import { Modal } from "../../../components/ui/modal";
+import { isAllSchoolsUser } from "../../../helpers/helper";
 
 interface FeeListItem {
     FEE_ID: string;
@@ -17,37 +28,49 @@ interface FeeListItem {
     TITLE: string;
     AMOUNT: string;
     REMARKS: string;
-    ACTIVE: boolean;
+    ACTIVE: number;
 }
 
 const FeeList = () => {
-    const [loading, setLoading] = useState<boolean>(false)
-    const [feelist, setFeelist] = useState<FeeListItem[]>([])
-    const [prevValues, setPrevValues] = useState({})
+    const [prevValues, setPrevValues] = useState<any>({})
     const addModal = useModal(false);
     const editModal = useModal(false);
 
-    const fetchFeelist = async () => {
-        setLoading(true)
+    const user = useSelector((state: any) => state.auth.authData.user)
+    const canViewAllSchools = isAllSchoolsUser(user)
+
+    // ✅ Fetch dropdown data
+    const { data: sessions = [] } = useQuery({
+        queryKey: ["sessions"],
+        queryFn: () => canViewAllSchools ? getSession() : getSessionBySchoolId(user.SCHOOL_ID),
+        select: (res) => res.data || [],
+    });
+
+    const { data: standards = [] } = useQuery({
+        queryKey: ["standards"],
+        queryFn: () => canViewAllSchools ? getStandard() : getStandardBySchoolId(user.SCHOOL_ID),
+        select: (res) => res.data || [],
+    });
+
+    const { data: categories = [] } = useQuery({
+        queryKey: ["categories"],
+        queryFn: () => getFeeCategory(),
+        select: (res) => res.data || [],
+    });
+
+    const toggleActive = async (row: FeeListItem) => {
         try {
-            const response = await API.getFeeList()
-            // console.log(response)
-            setFeelist(response.data)
+            await API.updateFeeList({
+                fee_id: row.FEE_ID,
+                session_id: row.SESSION_ID,
+                standard_id: row.STANDARD_ID,
+                fee_cat_id: row.FEE_CAT_ID,
+                title: row.TITLE,
+                amount: row.AMOUNT,
+                remarks: row.REMARKS,
+                active: row.ACTIVE === 1 ? 0 : 1
+            })
         } catch (error) {
-            console.log(error)
-        }
-        setLoading(false)
-    }
-
-    useEffect(() => {
-        fetchFeelist()
-    }, [])
-
-    const toggleActive = async (values: {}) => {
-        try {
-            const response = await API.updateFeeList(values)
-        }
-        catch (error: any) {
             console.log(error)
         }
     }
@@ -56,160 +79,177 @@ const FeeList = () => {
         try {
             const formData = new FormData()
             formData.append('fee_id', id)
-            const response = await API.deleteFeeList(formData)
-            Alert({
-                status: true,
-                text: 'Fee list deleted successfully...',
-            })
-            setFeelist(feelist.filter(item => item.FEE_ID !== id)) // Update the list after deletion
-        }
-        catch (error: any) {
-            console.log(error)
-            Alert({
-                status: false,
-                text: 'Something went wrong! Please try again.',
-            })
+
+            await API.deleteFeeList(formData)
+
+            Alert({ status: true, text: 'Deleted successfully' })
+        } catch (error) {
+            Alert({ status: false, text: 'Delete failed' })
         }
     }
 
     const columns: Column<FeeListItem>[] = [
-        {
-            key: 'session.SESSION_NAME',
-            header: 'Session',
-            sortable: true
-        },
-        {
-            key: 'standard.STANDARD_NAME',
-            header: 'Standard',
-            sortable: true
-        },
-        {
-            key: 'fee_category.CAT_TITLE',
-            header: 'Category',
-            sortable: true
-        },
-        {
-            key: 'TITLE',
-            header: 'Title',
-            sortable: true
-        },
-        {
-            key: 'AMOUNT',
-            header: 'Amount',
-            sortable: true
-        },
+        { key: 'session.SESSION_NAME', header: 'Session' },
+        { key: 'standard.STANDARD_NAME', header: 'Standard' },
+        { key: 'fee_category.CAT_TITLE', header: 'Category' },
+        { key: 'TITLE', header: 'Title' },
+        { key: 'AMOUNT', header: 'Amount' },
         {
             key: 'ACTIVE',
             header: 'Active',
-            sortable: true,
-            render: (row: any) => {
-                return (
-                    <div>
-                        <Switch label="" defaultChecked={row.ACTIVE == 1}
-                            onChange={() => toggleActive({
-                                fee_id: row.FEE_ID,
-                                session_id: row.SESSION_ID,
-                                standard_id: row.STANDARD_ID,
-                                fee_cat_id: row.FEE_CAT_ID,
-                                title: row.TITLE,
-                                amount: row.AMOUNT,
-                                remarks: row.REMARKS,
-                                active: row.ACTIVE == 1 ? 0 : 1
-                            })}
-                        />
-                    </div>
-                )
-            }
+            render: (row) => (
+                <Switch
+                    label=""
+                    defaultChecked={row.ACTIVE === 1}
+                    onChange={() => toggleActive(row)}
+                />
+            )
         },
         {
             key: 'REMARKS',
             header: 'Remarks',
-            sortable: true,
-            render: (row: any) => row.REMARKS || '-'
+            render: (row) => row.REMARKS || '-'
         },
         {
             key: 'ACTIONS',
             header: 'Actions',
-            render: (row: any) => {
-                return (
-                    <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:underline text-sm"
-                            onClick={() => {
-                                setPrevValues(row)
-                                editModal.openModal()
-                            }}
-                        >Edit</button>
-                        <form
-                            onSubmit={async (e) => {
-                                e.preventDefault()
+            render: (row) => (
+                <div className="flex flex-wrap space-x-2">
+                    <button
+                        className="text-blue-600"
+                        onClick={() => {
+                            setPrevValues(row)
+                            editModal.openModal()
+                        }}
+                    >
+                        Edit
+                    </button>
 
-                                const confirm = await AlertConfirm({
-                                    title: 'Are you sure?',
-                                    text: 'Do you really want to delete this session? This process cannot be undone.',
-                                })
+                    <button
+                        className="text-red-600"
+                        onClick={async () => {
+                            const confirm = await AlertConfirm({
+                                title: 'Are you sure?',
+                                text: 'Delete this record?'
+                            })
 
-                                if (confirm) {
-                                    handleDelete(row.FEE_ID)
-                                }
-                            }}
-                        >
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="text-red-600 hover:underline text-sm"
-                            >
-                                Delete
-                            </button>
-                        </form>
-
-                    </div>
-                )
-            }
-        },
+                            if (confirm) handleDelete(row.FEE_ID)
+                        }}
+                    >
+                        Delete
+                    </button>
+                </div>
+            )
+        }
     ]
 
-
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-500 dark:text-gray-400">Feelist</h2>
-                <Button size="sm" variant="primary"
-                    onClick={() => addModal.openModal()}
-                >
-                    Add New +
-                </Button>
+        <div className="space-y-4">
+            <div className="flex flex-wrap justify-between">
+                <PageBreadcrumb pageTitle="Fee List" />
+                <Button onClick={addModal.openModal}>Add New +</Button>
             </div>
 
-            <DataTable data={feelist} columns={columns} itemsPerPage={10} />
+            <Formik
+                initialValues={{
+                    session_id: '',
+                    standard_id: '',
+                    fee_cat_id: ''
+                }}
+                onSubmit={() => { }}
+            >
+                {({ values, setFieldValue }) => {
 
-            {
-                addModal.isOpen &&
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded w-[800px]">
-                        {/* <FeeCategoryAdd fetchData={fetchCategory} closeModal={addModal.closeModal} /> */}
-                        <FeeListAdd closeModal={addModal.closeModal} fetchData={fetchFeelist} />
-                        <div className="flex justify-end gap-2 mt-4">
-                            <Button variant="secondary" onClick={() => addModal.closeModal()}>
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            }
+                    const debouncedFilters = useDebounce(values, 500)
 
-            {
-                editModal.isOpen &&
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded w-[800px]">
-                        <FeeListEdit fetchData={fetchFeelist} closeModal={editModal.closeModal} prevValues={prevValues} />
-                        <div className="flex justify-end gap-2 mt-4">
-                            <Button variant="secondary" onClick={() => editModal.closeModal()}>
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            }
+                    // ✅ Set default values when data arrives
+                    useEffect(() => {
+                        if (sessions.length && !values.session_id) {
+                            setFieldValue("session_id", sessions[0].SESSION_ID)
+                        }
+                    }, [sessions])
+
+                    useEffect(() => {
+                        if (standards.length && !values.standard_id) {
+                            setFieldValue("standard_id", standards[0].STANDARD_ID)
+                        }
+                    }, [standards])
+
+                    useEffect(() => {
+                        if (categories.length && !values.fee_cat_id) {
+                            setFieldValue("fee_cat_id", categories[0].FEE_CAT_ID)
+                        }
+                    }, [categories])
+
+                    const { data: feelist = [], isFetching, refetch } = useQuery({
+                        queryKey: ["feeList", debouncedFilters],
+                        queryFn: () => API.getFilteredFeelist(debouncedFilters),
+                        enabled:
+                            !!debouncedFilters.session_id &&
+                            !!debouncedFilters.standard_id &&
+                            !!debouncedFilters.fee_cat_id,
+                        select: (res) => res.data || [],
+                    });
+
+                    return (
+                        <>
+                            <Form>
+                                <div className="flex flex-wrap gap-3">
+
+                                    <Select
+                                        name="session_id"
+                                        label="Session"
+                                        options={sessions.map((s: any) => ({
+                                            label: s.SESSION_NAME,
+                                            value: s.SESSION_ID,
+                                        }))}
+                                    />
+
+                                    <Select
+                                        name="standard_id"
+                                        label="Standard"
+                                        options={standards.map((s: any) => ({
+                                            label: s.STANDARD_NAME,
+                                            value: s.STANDARD_ID,
+                                        }))}
+                                    />
+
+                                    <Select
+                                        name="fee_cat_id"
+                                        label="Category"
+                                        options={categories.map((c: any) => ({
+                                            label: c.CAT_TITLE,
+                                            value: c.FEE_CAT_ID,
+                                        }))}
+                                    />
+                                </div>
+                            </Form>
+
+                            <DataTable
+                                data={feelist}
+                                columns={columns}
+                                itemsPerPage={10}
+                                loading={isFetching}
+                            />
+                            
+                            {/* Add Modal */}
+                            {addModal.isOpen && (
+                                <Modal isOpen={addModal.isOpen} onClose={addModal.closeModal} showCloseButton={true} className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                                    <FeeListAdd fetchData={refetch} closeModal={addModal.closeModal} />
+                                </Modal>
+                            )}
+
+                            {/* Edit Modal */}
+                            {editModal.isOpen && (
+                                <Modal isOpen={editModal.isOpen} onClose={editModal.closeModal} showCloseButton={true} className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                                    <FeeListEdit fetchData={refetch} prevValues={prevValues} closeModal={editModal.closeModal} />
+                                </Modal>
+                            )}
+                        </>
+                    )
+                }}
+            </Formik>
+
         </div>
     )
 }

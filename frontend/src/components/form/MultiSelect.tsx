@@ -113,7 +113,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
       </label>
 
       <div className="relative z-20 inline-block w-full">
-        <div className="relative flex flex-col items-center">
+        <div className="relative flex flex-wrap flex-col items-center">
           <div
             onClick={toggleDropdown}
             onKeyDown={handleKeyDown}
@@ -126,7 +126,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
             tabIndex={disabled ? -1 : 0}
           >
             <div
-              className={`mb-2 flex min-h-11  rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-theme-xs outline-hidden transition focus:border-brand-300 focus:shadow-focus-ring dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-300 ${
+              className={`mb-2 flex flex-wrap min-h-11  rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-theme-xs outline-hidden transition focus:border-brand-300 focus:shadow-focus-ring dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-300 ${
                 disabled
                   ? "opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800"
                   : "cursor-pointer"
@@ -140,7 +140,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                     return (
                       <div
                         key={value}
-                        className="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pl-2.5 pr-2 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800"
+                        className="group flex flex-wrap items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pl-2.5 pr-2 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800"
                       >
                         <span className="flex-initial max-w-full">{text}</span>
                         <button
@@ -176,7 +176,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                   </div>
                 )}
               </div>
-              <div className="flex items-center self-start py-1 pl-1 pr-1 w-7">
+              <div className="flex flex-wrap items-center self-start py-1 pl-1 pr-1 w-7">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -230,7 +230,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                     role="option"
                     aria-selected={isSelected}
                   >
-                    <div className="relative flex w-full items-center p-2 pl-2">
+                    <div className="relative flex flex-wrap w-full items-center p-2 pl-2">
                       <div className="mx-2 leading-6 text-gray-800 dark:text-white/90">
                         {option.text}
                       </div>

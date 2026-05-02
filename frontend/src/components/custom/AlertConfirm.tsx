@@ -10,7 +10,10 @@ const AlertConfirm = async ({ title = 'Are you sure?', text = 'You won\'t be abl
         cancelButtonColor: '#d33',
         confirmButtonText: confirmBtnText??'Yes',
         cancelButtonText: cancelBtnText??'Cancel',
-        allowOutsideClick: false
+        allowOutsideClick: false,
+        didOpen: (popup) => {
+            popup.style.zIndex = '99999';
+        }
     });
     return result.isConfirmed;
 };
