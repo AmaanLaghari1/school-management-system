@@ -2,67 +2,91 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
-use FPDF;
-use App\Services\ChallanPDF;
-use App\Services\VoucherPDF;
-use Illuminate\Support\Facades\Date;
-
 class PdfService
 {
-    protected $challanPDF;
     protected $VoucherPDF;
 
-    public function __construct($applicationId = null)
+    public function __construct()
     {
-        $this->challanPDF = new ChallanPDF('L', 'mm', 'A4');
-        $this->VoucherPDF = new VoucherPDF('L', 'mm', 'A4');
-
+        $this->VoucherPDF = new \App\Services\VoucherPDF(); // adjust namespace if needed
     }
 
-//    public function generatePdf($applicationData)
-//    {
-////        dd();
-//        $this->VoucherPDF->AddPage('L');
-//
-//        $challan = [
-//            'PAYMENT_DUE_DATE' => date("d-m-Y"),
-//            'EXPIRY' => '00-00-0000',
-//        ];
-//
-//        $x = 7;
-//        $this->VoucherPDF->myFunction("BANK COPY", $x, $challan, $applicationData);
-//        $this->VoucherPDF->myLine($x);
-//
-//        $x = 75;
-//        $this->VoucherPDF->myFunction("FINANCE COPY", $x, $challan, $applicationData);
-//        $this->VoucherPDF->myLine($x);
-//
-//        $x = 145;
-//        $this->VoucherPDF->myFunction("CANDIDATE COPY", $x, $challan, $applicationData);
-//        $this->VoucherPDF->myLine($x);
-//
-//        $x = 215;
-//        $this->VoucherPDF->myFunction("OFFICE COPY", $x, $challan, $applicationData);
-//
-//        return $this->VoucherPDF->Output('I', $this->challanPDF->file_name.'.pdf');
-//    }
-
-    public function generatePdf($voucherData)
+    public function generateMultipleVouchers($vouchers)
     {
-        $this->VoucherPDF->AddPage('L');
+        foreach ($vouchers as $voucher) {
 
-        $x = 9.5;
-        $this->VoucherPDF->renderVoucher("FINANCE COPY", $x, $voucherData);
-        $this->VoucherPDF->drawDivider($x);
+            $voucherData = $this->mapVoucherData($voucher);
 
-        $x = 103.5;
-        $this->VoucherPDF->renderVoucher("SCHOOL COPY", $x, $voucherData);
-        $this->VoucherPDF->drawDivider($x);
+            // Each voucher gets its own page
+            $this->VoucherPDF->AddPage('L');
 
-        $x = 197.5;
-        $this->VoucherPDF->renderVoucher("PARENT COPY", $x, $voucherData);
+            $this->renderTriplicateCopies($voucherData);
+        }
 
-        return $this->VoucherPDF->Output('S', 'fee_voucher.pdf');
+        return $this->VoucherPDF->Output('S', 'fee_vouchers.pdf');
+    }
+
+    /**
+     * Map DB data → clean array for PDF
+     */
+    private function mapVoucherData($voucher)
+    {
+        return [
+            'school_name' => optional($voucher->school)->SCHOOL_NAME ?? 'ABC Public School',
+
+            'student_name' => optional($voucher->enrolment->student)->NAME ?? 'N/A',
+
+            'father_name' => optional($voucher->enrolment->student)->FNAME ?? 'N/A',
+
+            'class' => optional($voucher->enrolment->standard)->STANDARD_NAME ?? 'N/A',
+
+            'fee_month' => $voucher->FEE_MONTH ?? '',
+
+            'due_date' => $voucher->DUE_DATE ?? now()->format('d-m-Y'),
+
+            'dues_amount' => $voucher->DUES_AMOUNT ?? '0.00',
+
+            // flatten nested relation safely
+            'fees' => $this->formatFees($voucher->details),
+        ];
+    }
+
+    /**
+     * Convert fee details into renderable format
+     */
+    private function formatFees($details)
+    {
+        return collect($details)->map(function ($detail) {
+            return [
+                'name' => $detail->fee_list->TITLE ?? 'Fee',
+                'amount' => $detail->fee_list->AMOUNT ?? 0,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Render 3 copies on same page
+     */
+    private function renderTriplicateCopies($voucherData)
+    {
+        $positions = [
+            ['title' => 'FINANCE COPY', 'x' => 9.5],
+            ['title' => 'SCHOOL COPY', 'x' => 103.5],
+            ['title' => 'PARENT COPY', 'x' => 197.5],
+        ];
+
+        foreach ($positions as $index => $pos) {
+
+            $this->VoucherPDF->renderVoucher(
+                $pos['title'],
+                $pos['x'],
+                $voucherData
+            );
+
+            // Draw divider except last
+            if ($index < 2) {
+                $this->VoucherPDF->drawDivider($pos['x']);
+            }
+        }
     }
 }

@@ -24,6 +24,8 @@ Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('register', [AuthController::class, 'register']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('forgot_password', [AuthController::class, 'sendPasswordResetLink']);
+    Route::post('reset_password', [AuthController::class, 'resetPassword']);
 });
 
 Route::prefix('school')->group(function () {

@@ -53,6 +53,14 @@ class VoucherPDF extends FPDF
         $y += 14;
         $this->drawDueDatePanel($innerX, $y, $innerW, $data);
 
+        // Dues Amount
+        $y += 16;
+        $this->SetFont('Arial', 'B', 9);
+        $this->SetXY($innerX, $y);
+        $this->Cell(52, 7, 'Dues Amount', 1);
+        $this->Cell(30, 7, 'Rs. ' . number_format($data['dues_amount'] ?? 0, 2), 1, 1, 'R');
+        $y += 10;
+
         $signatureY = max($y + 24, $bottomY - 28);
         $this->drawSignatures($innerX, $signatureY);
 
@@ -93,10 +101,10 @@ class VoucherPDF extends FPDF
     private function drawStudentPanel($x, $y, $width, $data)
     {
         $rows = [
-            ['Student', $this->value($data, 'student_name')],
-            ['Father', $this->value($data, 'father_name')],
-            ['Class', $this->value($data, 'class')],
-            ['Fee Month', $this->value($data, 'fee_month')],
+            ["Student Name", $this->value($data, 'student_name')],
+            ["Father's Name", $this->value($data, 'father_name')],
+            ["Class", $this->value($data, 'class')],
+            ["Fee Month", $this->value($data, 'fee_month')],
         ];
 
         $labelW = 28;

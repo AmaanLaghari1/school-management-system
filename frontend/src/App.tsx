@@ -30,6 +30,8 @@ import UserProfiles from "./pages/UserProfiles";
 import Users from "./pages/Users/Users";
 import FeeVoucherAdd from "./pages/FeeManagement/FeeVoucher/FeeVoucherAdd";
 import FeeVoucherEdit from "./pages/FeeManagement/FeeVoucher/FeeVoucherEdit";
+import ForgotPassword from "./pages/AuthPages/ForgotPassword";
+import ResetPassword from "./pages/AuthPages/ResetPassword";
 
 export default function App() {
   const auth = useSelector((state:any) => state.auth?.authData)
@@ -76,6 +78,8 @@ export default function App() {
           {/* Auth Layout */}
           <Route path="/signin" element={token ? <Navigate to='/' /> : <SignIn />} />
           <Route path="/signup" element={token ? <Navigate to='/' /> : <SignUp />} />
+          <Route path="/forgot_password" element={token ? <Navigate to='/' /> : <ForgotPassword />} />
+          <Route path="/reset_password" element={token ? <Navigate to='/' /> : <ResetPassword />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

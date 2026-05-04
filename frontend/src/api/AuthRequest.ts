@@ -25,3 +25,19 @@ export const logOut = (token: string) => {
         }
     })
 }
+
+export const forgotPassword = (formdata: {}) => {
+    return API.post('/forgot_password', formdata, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+}
+
+export const resetPassword = (formdata: {}) => {
+    return API.post('/reset_password', formdata, {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+}

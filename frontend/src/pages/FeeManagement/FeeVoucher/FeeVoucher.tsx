@@ -54,14 +54,14 @@ const FeeVoucher = () => {
     const canViewAllSchools = isAllSchoolsUser(user)
     const queryClient = useQueryClient()
 
-    // ✅ Fetch schools
+    // Fetch schools
     const { data: schools = [] } = useQuery({
         queryKey: ['schools', user?.SCHOOL_ID],
         queryFn: getSchool,
         select: (res) => filterSchoolsForUser(res.data || [], user),
     })
 
-    // ✅ Delete
+    // Delete
     const handleDelete = async (id: string) => {
         setLoading(true)
         try {
@@ -74,7 +74,7 @@ const FeeVoucher = () => {
         setLoading(false)
     }
 
-    // ✅ Toggle active
+    // Toggle active
     const toggleActive = async (values: {}) => {
         try {
             await API.updateFeeVoucher(values)
@@ -84,7 +84,7 @@ const FeeVoucher = () => {
         }
     }
 
-    // ✅ Download helper
+    // Download helper
     const downloadFile = (data: any, filename: string) => {
         const url = window.URL.createObjectURL(
             new Blob([data], { type: 'application/pdf' })
@@ -109,22 +109,25 @@ const FeeVoucher = () => {
                         variant="success"
                         disabled={!selectedIds.length || downloading}
                         onClick={async () => {
-                            setDownloading(true)
+                            // setDownloading(true)
                             try {
                                 const res = await API.downloadVoucher({
                                     voucher_ids: selectedIds,
                                 })
+                                console.log(res)
+                                // return
                                 downloadFile(res.data, 'fee_voucher.pdf')
-                            } catch {
+                            } catch (error) {
                                 Alert({ status: false, text: 'Download failed' })
+                                console.log(error)
                             }
-                            setDownloading(false)
+                            // setDownloading(false)
                         }}
                     >
                         Download Selected
                     </Button>
 
-                    <Button
+                    {/* <Button
                         size="sm"
                         variant="secondary"
                         disabled={downloading}
@@ -142,7 +145,7 @@ const FeeVoucher = () => {
                         }}
                     >
                         Download All
-                    </Button>
+                    </Button> */}
 
                     <Button
                         size="sm"
@@ -322,8 +325,9 @@ const FeeVoucher = () => {
                             key: 'ACTIONS',
                             header: 'Actions',
                             render: (row) => (
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex gap-2">
                                     <button
+                                        className="text-yellow-600 hover:underline text-sm"
                                         onClick={() => {
                                             setPrevValues(row)
                                             viewModal.openModal()
@@ -333,6 +337,7 @@ const FeeVoucher = () => {
                                     </button>
 
                                     <button
+                                        className="text-green-600 hover:underline text-sm"
                                         onClick={() =>
                                             navigate(
                                                 '/fee/voucher/edit',
@@ -346,6 +351,7 @@ const FeeVoucher = () => {
                                     </button>
 
                                     <button
+                                        className="text-red-600 hover:underline text-sm"
                                         onClick={async () => {
                                             const confirm =
                                                 await AlertConfirm({
@@ -427,6 +433,7 @@ const FeeVoucher = () => {
                             <Modal
                                 isOpen={viewModal.isOpen}
                                 onClose={viewModal.closeModal}
+                                className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto"
                             >
                                 <h2>Fee Voucher Details</h2>
                                 <DataTable

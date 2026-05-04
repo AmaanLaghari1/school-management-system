@@ -234,7 +234,8 @@ const FeeList = () => {
                             
                             {/* Add Modal */}
                             {addModal.isOpen && (
-                                <Modal isOpen={addModal.isOpen} onClose={addModal.closeModal} showCloseButton={true} className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                                <Modal isOpen={addModal.isOpen} onClose={addModal.closeModal} showCloseButton={true} 
+                                className="p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                                     <FeeListAdd fetchData={refetch} closeModal={addModal.closeModal} />
                                 </Modal>
                             )}
