@@ -14,6 +14,7 @@ interface InputProps {
   step?: number;
   disabled?: boolean;
   required?: boolean;
+  readonly?: boolean;
   hint?: string;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
@@ -30,6 +31,7 @@ const Input: React.FC<InputProps> = ({
   step,
   disabled = false,
   required = false,
+  readonly = false,
   hint,
   ...props
 }) => {
@@ -69,6 +71,7 @@ const Input: React.FC<InputProps> = ({
         max={max}
         step={step}
         disabled={disabled}
+        readOnly={readonly}
         className={"mt-2"+inputClasses}
         {...field}
         {...props}

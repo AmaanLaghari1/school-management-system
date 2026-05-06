@@ -55,7 +55,9 @@ const ForgotPassword = () => {
                                         name='email'
                                     />
                                 </div>
-                                <Button disabled={loading} className='mt-5' type="submit">Submit</Button>
+                                <Button disabled={loading} className='mt-5' type="submit">
+                                    {loading ? 'Submitting...' : 'Submit'}
+                                </Button>
                             </Form>
                         )}
                     </Formik>

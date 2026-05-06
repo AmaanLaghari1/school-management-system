@@ -49,7 +49,7 @@ const FeeListForm: FC<FormProps> = ({
     const fetchSessions = async () => {
         try {
             const response = await getSession()
-            setSessions(response.data || [])
+            setSessions(canViewAllSchools ? response.data || [] : response.data?.filter((s: any) => s.SCHOOL_ID === user.SCHOOL_ID) || [])
         } catch (error) {
             console.error("Error fetching sessions:", error)
         }

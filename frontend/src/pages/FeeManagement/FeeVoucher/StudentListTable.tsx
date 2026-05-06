@@ -60,15 +60,15 @@ const StudentTable = ({
     }
   };
 
-  const handleDueAmountChange = (studentId: any, value: string) => {
-    const updated = selectedStudents.map((student: any) =>
-      student.ENROLMENT_ID === studentId
-        ? { ...student, DUES_AMOUNT: value }
-        : student
-    );
+  // const handleDueAmountChange = (studentId: any, value: string) => {
+  //   const updated = selectedStudents.map((student: any) =>
+  //     student.ENROLMENT_ID === studentId
+  //       ? { ...student, DUES_AMOUNT: value }
+  //       : student
+  //   );
 
-    onChange(updated);
-  };
+  //   onChange(updated);
+  // };
 
   if (loading) return <p>Loading students...</p>;
   if (!safeList.length) return null;
@@ -79,7 +79,7 @@ const StudentTable = ({
 
         <TableHeader>
           <TableRow>
-            <TableCell colSpan="4" className="border p-2">
+            <TableCell colSpan="4" className="dark:text-white border p-2">
               <b>Students List</b>
             </TableCell>
           </TableRow>
@@ -98,9 +98,9 @@ const StudentTable = ({
                 onChange={toggleAll}
               />
             </TableCell>
-            <TableCell className="border p-2"><b>#</b></TableCell>
-            <TableCell className="border p-2"><b>Student Name</b></TableCell>
-            <TableCell className="border p-2"><b>Due Amount</b></TableCell>
+            <TableCell className="dark:text-white border p-2"><b>#</b></TableCell>
+            <TableCell className="dark:text-white border p-2"><b>Student Name</b></TableCell>
+            <TableCell className="dark:text-white border p-2"><b>Due Amount</b></TableCell>
           </TableRow>
 
           {safeList.map((s: any, i: number) => {
@@ -108,7 +108,7 @@ const StudentTable = ({
 
             return (
               <TableRow key={s.ENROLMENT_ID}>
-                <TableCell className="border p-2">
+                <TableCell className="dark:text-white border p-2">
                   <input
                     type="checkbox"
                     checked={selected}
@@ -116,13 +116,13 @@ const StudentTable = ({
                   />
                 </TableCell>
 
-                <TableCell className="border p-2">{i + 1}</TableCell>
+                <TableCell className="dark:text-white border p-2">{i + 1}</TableCell>
 
-                <TableCell className="border p-2">
+                <TableCell className="dark:text-white border p-2">
                   {s?.student?.NAME || "N/A"}
                 </TableCell>
-                <TableCell className="border p-2">
-                  <input
+                <TableCell className="dark:text-white border p-2">
+                  {/* <input
                     type="text"
                     value={prevValues?.DUES_AMOUNT ? prevValues.DUES_AMOUNT : (selectedMap.get(s.ENROLMENT_ID)?.DUES_AMOUNT ?? s?.DUES_AMOUNT ?? "")}
                     onChange={(e) =>
@@ -132,7 +132,8 @@ const StudentTable = ({
                     placeholder="Enter due amount"
                     name="due_amount"
                     className="w-full rounded border px-2 py-1"
-                  />
+                  /> */}
+                  {prevValues?.DUES_AMOUNT ? prevValues.DUES_AMOUNT : (selectedMap.get(s.ENROLMENT_ID)?.DUES_AMOUNT ?? s?.DUES_AMOUNT ?? "")}
                 </TableCell>
               </TableRow>
             );

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { Link } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../../redux/actions/AuthAction";
 
@@ -99,7 +98,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Edit profile
+              Profile
             </DropdownItem>
           </li>
           {/* <li>

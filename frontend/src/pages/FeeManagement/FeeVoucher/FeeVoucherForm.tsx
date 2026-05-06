@@ -8,6 +8,7 @@ import DatePicker from "../../../components/form/date-picker";
 import Button from "../../../components/ui/button/Button";
 import FeeTable from "./FeeTable";
 import StudentListTable from "./StudentListTable";
+
 import {
   getSession,
   getSessionBySchoolId,
@@ -16,14 +17,18 @@ import {
   getStandard,
   getStandardBySchoolId,
 } from "../../../api/StandardRequest";
-import {
-  getEnrolmentByFilters,
-} from "../../../api/EnrolmentRequest";
+import { getEnrolmentByFilters } from "../../../api/EnrolmentRequest";
 import { getFeeCategory } from "../../../api/FeeCategory";
 import { getFilteredFeelist } from "../../../api/FeeList";
-import { getFeeVoucher, getFeeVoucherBySchoolId } from "../../../api/FeeVoucher";
+import {
+  getFeeVoucher,
+  getFeeVoucherBySchoolId,
+} from "../../../api/FeeVoucher";
+import { getSchool } from "../../../api/SchoolRequest"; // ADD THIS
+
 import { useSelector } from "react-redux";
 import { isAllSchoolsUser } from "../../../helpers/helper";
+import { useLocation } from "react-router";
 
 // 🔹 Debounce Hook
 const useDebounce = (value: any, delay = 400) => {
@@ -37,7 +42,9 @@ const useDebounce = (value: any, delay = 400) => {
   return debounced;
 };
 
+// 🔹 Validation
 const validationSchema = Yup.object({
+  school_id: Yup.string().required("Required"),
   session_id: Yup.string().required("Required"),
   standard_id: Yup.string().required("Required"),
   fee_month: Yup.string().required("Required"),
@@ -45,30 +52,19 @@ const validationSchema = Yup.object({
   fee_cat_id: Yup.string().required("Required"),
 });
 
-const belongsToSchool = (record: any, schoolId: any) => {
-  const target = String(schoolId ?? "");
-
-  return [
-    record?.SCHOOL_ID,
-    record?.school?.SCHOOL_ID,
-    record?.student?.SCHOOL_ID,
-    record?.student?.school?.SCHOOL_ID,
-    record?.standard?.SCHOOL_ID,
-    record?.enrolment?.SCHOOL_ID,
-    record?.enrolment?.student?.SCHOOL_ID,
-  ].some((value) => String(value ?? "") === target);
-};
-
 const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
   const user = useSelector((state: any) => state.auth.authData.user);
   const canViewAllSchools = isAllSchoolsUser(user);
   const lastStudentSetRef = useRef("");
+  const location = useLocation()
+  const {prevValues} = location.state || {}
 
   return (
     <Formik
       initialValues={{
         selected_fees: [],
         selected_students: [],
+        school_id: user.SCHOOL_ID !== 0 ? user.SCHOOL_ID : "",
         ...initialValues,
       }}
       validationSchema={validationSchema}
@@ -76,24 +72,41 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
       enableReinitialize
     >
       {({ values, setFieldValue }) => {
+        // 🔹 Effective School ID (single source of truth)
+        const effectiveSchoolId =
+          values.school_id || user.SCHOOL_ID;
 
-        // 🔹 Debounced filters (stable input)
+        // 🔹 Debounced filters
         const debouncedFilters = useDebounce({
           session_id: values.session_id,
           standard_id: values.standard_id,
           fee_cat_id: values.fee_cat_id,
+          school_id: effectiveSchoolId,
         });
 
         // 🔹 Queries
+        const { data: schools = [] } = useQuery({
+          queryKey: ["schools"],
+          queryFn: getSchool,
+          enabled: canViewAllSchools,
+          select: (res) => res.data || [],
+        });
+
         const { data: sessions = [] } = useQuery({
-          queryKey: ["sessions", user.SCHOOL_ID],
-          queryFn: () => canViewAllSchools ? getSession() : getSessionBySchoolId(user.SCHOOL_ID),
+          queryKey: ["sessions", effectiveSchoolId],
+          queryFn: () =>
+            canViewAllSchools
+              ? getSession()
+              : getSessionBySchoolId(effectiveSchoolId),
           select: (res) => res.data || [],
         });
 
         const { data: standards = [] } = useQuery({
-          queryKey: ["standards", user.SCHOOL_ID],
-          queryFn: () => canViewAllSchools ? getStandard() : getStandardBySchoolId(user.SCHOOL_ID),
+          queryKey: ["standards", effectiveSchoolId],
+          queryFn: () =>
+            canViewAllSchools
+              ? getStandard()
+              : getStandardBySchoolId(effectiveSchoolId),
           select: (res) => res.data || [],
         });
 
@@ -101,10 +114,21 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
           data: enrolments = [],
           isLoading: enrolmentsLoading,
         } = useQuery({
-          queryKey: ["enrolments", values.session_id, values.standard_id],
+          queryKey: [
+            "enrolments",
+            values.session_id,
+            values.standard_id,
+            effectiveSchoolId,
+          ],
           queryFn: () =>
-            getEnrolmentByFilters(values.session_id, values.standard_id),
-          enabled: !!values.session_id && !!values.standard_id,
+            getEnrolmentByFilters(
+              values.session_id,
+              values.standard_id,
+            ),
+          enabled:
+            !!values.session_id &&
+            !!values.standard_id &&
+            !!effectiveSchoolId,
           select: (res) => res.data || [],
         });
 
@@ -115,8 +139,11 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
         });
 
         const { data: vouchers = [] } = useQuery({
-          queryKey: ["feeVouchers", user.SCHOOL_ID],
-          queryFn: () => canViewAllSchools ? getFeeVoucher() : getFeeVoucherBySchoolId(user.SCHOOL_ID),
+          queryKey: ["feeVouchers", effectiveSchoolId],
+          queryFn: () =>
+            canViewAllSchools
+              ? getFeeVoucher()
+              : getFeeVoucherBySchoolId(effectiveSchoolId),
           select: (res) => res.data || [],
         });
 
@@ -134,6 +161,15 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
         });
 
         // 🔹 Options
+        const schoolOptions = useMemo(
+          () =>
+            schools.map((s: any) => ({
+              label: s.SCHOOL_NAME,
+              value: s.SCHOOL_ID,
+            })),
+          [schools]
+        );
+
         const sessionOptions = useMemo(
           () =>
             sessions.map((s: any) => ({
@@ -161,40 +197,32 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
           [feeCategories]
         );
 
+        // 🔹 Due Map
         const dueAmountMap = useMemo(() => {
           const map = new Map();
-
-          vouchers.forEach((voucher: any) => {
-            if (!voucher?.ENROLMENT_ID) return;
-            map.set(voucher.ENROLMENT_ID, voucher.DUES_AMOUNT ?? "");
+          vouchers.forEach((v: any) => {
+            if (v?.ENROLMENT_ID) {
+              map.set(v.ENROLMENT_ID, v.DUES_AMOUNT ?? "");
+            }
           });
-
           return map;
         }, [vouchers]);
 
-        const scopedEnrolments = useMemo(
-          () =>
-            canViewAllSchools
-              ? enrolments
-              : enrolments.filter((student: any) =>
-                  belongsToSchool(student, user?.SCHOOL_ID)
-                ),
-          [enrolments, canViewAllSchools, user?.SCHOOL_ID]
-        );
-
         const studentsWithDues = useMemo(
           () =>
-            scopedEnrolments.map((student: any) => ({
-              ...student,
-              DUES_AMOUNT: dueAmountMap.get(student.ENROLMENT_ID) ?? "",
+            enrolments.map((s: any) => ({
+              ...s,
+              DUES_AMOUNT:
+                dueAmountMap.get(s.ENROLMENT_ID) ?? "",
             })),
-          [scopedEnrolments, dueAmountMap]
+          [enrolments, dueAmountMap]
         );
 
-        // 🔹 Derived total (no Formik state)
+        // 🔹 Total
         const total = useMemo(() => {
           return values.selected_fees.reduce(
-            (sum: number, f: any) => sum + Number(f.AMOUNT || 0),
+            (sum: number, f: any) =>
+              sum + Number(f.AMOUNT || 0),
             0
           );
         }, [values.selected_fees]);
@@ -203,41 +231,64 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
           if (values.current_amount !== total) {
             setFieldValue("current_amount", total);
           }
-        }, [total, values.current_amount, setFieldValue]);
+        }, [total]);
 
         // 🔹 Handlers
-        const handleFeeChange = useCallback((fees: any[]) => {
-          setFieldValue("selected_fees", fees);
-        }, [setFieldValue]);
+        const handleFeeChange = useCallback(
+          (fees: any[]) =>
+            setFieldValue("selected_fees", fees),
+          []
+        );
 
-        const handleStudentChange = useCallback((students: any[]) => {
-          setFieldValue("selected_students", students);
-        }, [setFieldValue]);
+        const handleStudentChange = useCallback(
+          (students: any[]) =>
+            setFieldValue("selected_students", students),
+          []
+        );
 
-        // 🔹 Auto-select students safely (no loop)
+        // 🔹 Auto-select students
         useEffect(() => {
-          const allStudents =
-            studentsWithDues.length > 0
-              ? studentsWithDues.map((s: any) => ({
-                ENROLMENT_ID: s.ENROLMENT_ID,
-                NAME: s?.student?.NAME || "N/A",
-                DUES_AMOUNT: s.DUES_AMOUNT ?? "",
-              }))
-              : [];
+          const allStudents = studentsWithDues.map(
+            (s: any) => ({
+              ENROLMENT_ID: s.ENROLMENT_ID,
+              NAME: s?.student?.NAME || "N/A",
+              DUES_AMOUNT: s.DUES_AMOUNT,
+            })
+          );
 
-          const studentSetKey = allStudents
-            .map((student: any) => student.ENROLMENT_ID)
+          const key = allStudents
+            .map((s: any) => s.ENROLMENT_ID)
             .join("|");
 
-          if (lastStudentSetRef.current !== studentSetKey) {
-            lastStudentSetRef.current = studentSetKey;
+          if (lastStudentSetRef.current !== key) {
+            lastStudentSetRef.current = key;
             setFieldValue("selected_students", allStudents);
           }
-        }, [studentsWithDues, setFieldValue]);
+        }, [studentsWithDues]);
 
         return (
           <Form>
             <div className="grid sm:grid-cols-2 gap-2">
+
+              {/* School Field */}
+              {user.SCHOOL_ID === 0 ? (
+                <Select
+                  name="school_id"
+                  label="School"
+                  options={schoolOptions}
+                  disabled={prevValues?.SCHOOL_ID} // Disable if editing existing voucher
+                  required
+                />
+              ) : (
+                <div style={{display: 'none'}}>
+                  <Input
+                    name="school_id"
+                    label="School"
+                    value={user.SCHOOL_ID}
+                    disabled
+                  />
+                </div>
+              )}
 
               <Select
                 name="session_id"
@@ -260,12 +311,16 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
                 loading={enrolmentsLoading}
               />
 
-              <Input name="fee_month" type="month" label="Month" required />
+              <Input
+                name="fee_month"
+                type="month"
+                label="Month"
+                required
+              />
 
               <Select
                 name="fee_cat_id"
                 label="Fee Category"
-                disabled={!values.standard_id || !values.session_id}
                 options={feeCategoryOptions}
                 required
               />
@@ -284,17 +339,21 @@ const FeeVoucherForm = ({ initialValues, onSubmit, loading }: any) => {
                 loading={feeLoading}
               />
 
-              {/* ✅ Derived value (no state loop) */}
               <Input
                 name="current_amount"
                 label="Current Amount"
                 value={total}
+                readonly={true}
               />
 
               <Input name="remarks" label="Remarks" />
             </div>
 
-            <Button className="mt-5" disabled={loading} type="submit">
+            <Button
+              className="mt-5"
+              disabled={loading}
+              type="submit"
+            >
               {loading ? "Saving..." : "Save"}
             </Button>
           </Form>

@@ -109,7 +109,7 @@ public function login(Request $request){
         $validation = Validator::make(
             $request->all(),
             [
-                "email" => "required|email|exists:users,email",
+                "email" => "required|email|exists:users,EMAIL",
             ]
         );
 

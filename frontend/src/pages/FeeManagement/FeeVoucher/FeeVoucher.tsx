@@ -124,7 +124,7 @@ const FeeVoucher = () => {
                             // setDownloading(false)
                         }}
                     >
-                        Download Selected
+                        Export PDF
                     </Button>
 
                     {/* <Button

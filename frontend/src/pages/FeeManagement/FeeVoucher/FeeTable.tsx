@@ -95,7 +95,7 @@ const FeeTable = ({
             </TableCell>
             <TableCell className="border dark:text-white p-2"><b>Title</b></TableCell>
             <TableCell className="border dark:text-white p-2"><b>Amount</b></TableCell>
-            <TableCell className="border dark:text-white p-2"><b>Remarks</b></TableCell>
+            {/* <TableCell className="border dark:text-white p-2"><b>Remarks</b></TableCell> */}
           </TableRow>
 
           {/* Rows */}
@@ -116,7 +116,7 @@ const FeeTable = ({
                 <TableCell className="border dark:text-white p-2">{f.TITLE}</TableCell>
                 <TableCell className="border dark:text-white p-2">{f.AMOUNT}</TableCell>
 
-                <TableCell className="border">
+                {/* <TableCell className="border">
                   <input
                     disabled={!selected}
                     value={selectedObj?.REMARKS || ""}
@@ -126,7 +126,7 @@ const FeeTable = ({
                     placeholder="Enter remarks"
                     className="border px-2 py-1 rounded w-full dark:text-white"
                   />
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             );
           })}

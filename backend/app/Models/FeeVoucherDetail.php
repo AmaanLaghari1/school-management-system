@@ -8,9 +8,11 @@ class FeeVoucherDetail extends Model
 {
     //
     protected $table = 'voucher_details';
-    protected $primaryKey = 'VOUCHER_ID';
+    public $incrementing = false;
+    protected $primaryKey = null;
 
     protected $fillable = [
+        'VOUCHER_ID',
         'FEE_ID',
         'AMOUNT',
         'REMARKS'

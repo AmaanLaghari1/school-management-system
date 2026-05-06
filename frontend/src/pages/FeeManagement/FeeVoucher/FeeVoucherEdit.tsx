@@ -24,7 +24,7 @@ const FeeVoucherEdit = () => {
         voucher_id: prevValues?.VOUCHER_ID || '',
         session_id: prevValues?.enrolment?.SESSION_ID || '',
         standard_id: prevValues?.enrolment?.STANDARD_ID || '',
-        school_id: user.SCHOOL_ID || '',
+        school_id: prevValues?.SCHOOL_ID || '',
         enrolment_id: prevValues?.ENROLMENT_ID || '',
         fee_month: prevValues?.FEE_MONTH || '',
         date: prevValues?.DATE || '',

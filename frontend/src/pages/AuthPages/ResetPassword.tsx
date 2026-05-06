@@ -14,7 +14,7 @@ const ResetPassword = () => {
     const [params] = useSearchParams();
 
     const token = params.get('token');
-    const email = params.get('email');
+    // const email = params.get('email');
 
     return (
         <AuthLayout>
@@ -69,7 +69,9 @@ const ResetPassword = () => {
                                         name='confirmNewPassword'
                                     />
                                 </div>
-                                <Button disabled={loading} className='mt-5' type="submit">Submit</Button>
+                                <Button disabled={loading} className='mt-5' type="submit">
+                                    {loading ? 'Submitting...' : 'Submit'}
+                                </Button>
                             </Form>
                         )}
                     </Formik>

@@ -70,7 +70,7 @@ class FeeVoucherController extends Controller
                 'remarks' => 'nullable|string',
 
                 'selected_fees' => 'required|array|min:1',
-                'selected_fees.*.FEE_ID' => 'required|integer',
+                'selected_fees.*.FEE_ID' => 'required|integer|distinct|exists:fee_lists,FEE_ID',
                 'selected_fees.*.AMOUNT' => 'required|numeric|min:0',
                 'selected_fees.*.REMARKS' => 'nullable|string',
 
@@ -86,27 +86,29 @@ class FeeVoucherController extends Controller
 
             DB::beginTransaction();
 
-            $students     = $request->input('selected_students');
-            $selectedFees = $request->input('selected_fees', []);
-            $feeRemarks   = $request->input('fee_remarks', []);
+            $students     = $request->selected_students;
+            $selectedFees = collect($request->selected_fees);
+            $feeRemarks   = $request->fee_remarks ?? [];
             $feeMonth     = strtoupper($request->fee_month);
 
             $createdVouchers = [];
-            $skippedFeesLog  = [];
 
+            /*
+            |--------------------------------------------------------------------------
+            | STEP 1: CREATE VOUCHERS
+            |--------------------------------------------------------------------------
+            */
             foreach ($students as $student) {
 
-                // 🔍 Get all existing FEE_IDs for this student + month
-                $voucherExists = FeeVoucher::where('ENROLMENT_ID', $student['ENROLMENT_ID'])
+                $exists = FeeVoucher::where('ENROLMENT_ID', $student['ENROLMENT_ID'])
                     ->where('FEE_MONTH', $feeMonth)
                     ->exists();
 
-                // Skip if already exists
-                if ($voucherExists) {
+                if ($exists) {
                     continue;
                 }
 
-                // ➕ Create Voucher
+                DB::statement('SET FOREIGN_KEY_CHECKS=0');
                 $voucher = FeeVoucher::create([
                     'SCHOOL_ID'      => $request->school_id,
                     'ENROLMENT_ID'   => $student['ENROLMENT_ID'],
@@ -118,49 +120,91 @@ class FeeVoucherController extends Controller
                     'REMARKS'        => strtoupper($request->remarks ?? '')
                 ]);
 
-                $detailsData = [];
+                $createdVouchers[] = $voucher;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | STEP 2: PREPARE DETAILS DATA (AFTER VOUCHERS CREATED)
+            |--------------------------------------------------------------------------
+            */
+            $detailsData = [];
+
+            foreach ($createdVouchers as $voucher) {
 
                 foreach ($selectedFees as $fee) {
 
                     $feeId = $fee['FEE_ID'];
 
-                    // 📝 Handle remarks override
-                    $remarks = $fee['REMARKS'] ?? '';
-                    if (isset($feeRemarks[$feeId])) {
-                        $remarks = $feeRemarks[$feeId];
-                    }
+                    // Merge remarks (priority: fee_remarks > fee.REMARKS)
+                    $remarks = $feeRemarks[$feeId] ?? $fee['REMARKS'] ?? '';
 
                     $detailsData[] = [
                         'VOUCHER_ID' => $voucher->VOUCHER_ID,
                         'FEE_ID'     => $feeId,
                         'AMOUNT'     => $fee['AMOUNT'] ?? 0,
-                        'REMARKS'    => strtoupper($remarks ?? ''),
+                        'REMARKS'    => strtoupper($remarks),
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
                 }
-
-                // ➕ Insert only if we have non-duplicate fees
-                if (!empty($detailsData)) {
-                    FeeVoucherDetail::insert($detailsData);
-                }
-
-                $createdVouchers[] = $voucher->load('details');
             }
 
-            if (empty($createdVouchers)) {
-                return response()->json([
-                    'message' => 'vouchers already exist for the selected students and month.',
-                    'data'    => []
-                ], 403);
+            /*
+            |--------------------------------------------------------------------------
+            | STEP 3: REMOVE DUPLICATES (COMPOSITE KEY SAFE)
+            |--------------------------------------------------------------------------
+            */
+            $detailsData = collect($detailsData)
+                ->unique(fn ($item) => $item['VOUCHER_ID'].'-'.$item['FEE_ID'])
+                ->values()
+                ->toArray();
+
+            /*
+            |--------------------------------------------------------------------------
+            | STEP 4: BULK UPSERT
+            |--------------------------------------------------------------------------
+            */
+            if (!empty($detailsData)) {
+                DB::transaction(function () use ($detailsData) {
+
+                    DB::statement('SET FOREIGN_KEY_CHECKS=0');
+
+                    FeeVoucherDetail::upsert(
+                        $detailsData,
+                        ['VOUCHER_ID', 'FEE_ID'],
+                        ['AMOUNT', 'REMARKS']
+                    );
+
+                    DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                });
             }
 
             DB::commit();
 
+            /*
+            |--------------------------------------------------------------------------
+            | STEP 5: LOAD RELATIONS
+            |--------------------------------------------------------------------------
+            */
+            $createdVouchers = FeeVoucher::with([
+                'details.fee_list',
+                'enrolment.student',
+                'school'
+            ])
+                ->whereIn('VOUCHER_ID', collect($createdVouchers)->pluck('VOUCHER_ID'))
+                ->get();
+
+            if ($createdVouchers->isEmpty()) {
+                return response()->json([
+                    'message' => 'Vouchers already exist for selected students and month.',
+                    'data'    => []
+                ], 403);
+            }
+
             return response()->json([
                 'message' => 'Fee Voucher created successfully.',
-                'data'    => $createdVouchers,
-                'skipped_fees' => $skippedFeesLog
+                'data'    => $createdVouchers
             ], 201);
 
         } catch (\Exception $e) {
@@ -173,6 +217,7 @@ class FeeVoucherController extends Controller
             ], 500);
         }
     }
+
     public function update(Request $request)
     {
         try {
@@ -198,6 +243,7 @@ class FeeVoucherController extends Controller
             }
 
             DB::beginTransaction();
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
             $selectedFees = $request->input('selected_fees', []);
             $students     = $request->input('selected_students', []);
@@ -278,6 +324,7 @@ class FeeVoucherController extends Controller
             }
 
             DB::commit();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
             return response()->json([
                 'message' => 'Fee Vouchers updated successfully.',
