@@ -15,10 +15,16 @@ use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\API\StudentRegistrationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::post('registration/get_by', [StudentRegistrationController::class, 'getByFilters']);
+Route::post('registration/register_student', [StudentRegistrationController::class, 'store']);
+Route::post('registration/update_registration/{id}', [StudentRegistrationController::class, 'update']);
+Route::get('registration/pdf/{id}', [StudentRegistrationController::class, 'pdf']);
 
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -135,5 +141,3 @@ Route::prefix('fee')->group(function () {
 
     });
 });
-
-

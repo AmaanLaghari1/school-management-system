@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { ScrollToTop } from "./components/common/ScrollToTop";
+import { useSelector } from "react-redux";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import AppLayout from "./layout/AppLayout";
-import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import School from "./pages/School/School";
 import SchoolAdd from "./pages/School/SchoolAdd";
@@ -11,7 +12,6 @@ import SchoolEdit from "./pages/School/SchoolEdit";
 import Student from "./pages/Student/Student";
 import StudentAdd from "./pages/Student/StudentAdd";
 import StudentEdit from "./pages/Student/StudentEdit";
-import { useSelector } from "react-redux";
 import Session from "./pages/Session/Session";
 import SessionEdit from "./pages/Session/SessionEdit";
 import SessionAdd from "./pages/Session/SessionAdd";
@@ -32,6 +32,9 @@ import FeeVoucherAdd from "./pages/FeeManagement/FeeVoucher/FeeVoucherAdd";
 import FeeVoucherEdit from "./pages/FeeManagement/FeeVoucher/FeeVoucherEdit";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 import ResetPassword from "./pages/AuthPages/ResetPassword";
+import Registration from "./pages/Registration/Registration";
+import RegistrationAdd from "./pages/Registration/RegistrationAdd";
+import RegistrationEdit from "./pages/Registration/RegistrationEdit";
 
 export default function App() {
   const auth = useSelector((state:any) => state.auth?.authData)
@@ -48,7 +51,7 @@ export default function App() {
         <Routes>
           {/* Dashboard Layout */}
           <Route element={!token ? <Navigate to='/signin' /> : <AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            <Route index path="/home" element={<Home />} />
             <Route index path="/schools" element={<School />} />
             <Route index path="/school/add" element={<SchoolAdd />} />
             <Route index path="/school/edit" element={<SchoolEdit />} />
@@ -76,10 +79,13 @@ export default function App() {
           </Route>
 
           {/* Auth Layout */}
-          <Route path="/signin" element={token ? <Navigate to='/' /> : <SignIn />} />
-          <Route path="/signup" element={token ? <Navigate to='/' /> : <SignUp />} />
-          <Route path="/forgot_password" element={token ? <Navigate to='/' /> : <ForgotPassword />} />
-          <Route path="/reset_password" element={token ? <Navigate to='/' /> : <ResetPassword />} />
+          <Route path="/" element={token ? <Navigate to='/home' /> : <Registration />} />
+          <Route path="/register" element={token ? <Navigate to='/home' /> : <RegistrationAdd />} />
+          <Route path="/registration/edit" element={token ? <Navigate to='/home' /> : <RegistrationEdit />} />
+          <Route path="/signin" element={token ? <Navigate to='/home' /> : <SignIn />} />
+          <Route path="/signup" element={token ? <Navigate to='/home' /> : <SignUp />} />
+          <Route path="/forgot_password" element={token ? <Navigate to='/home' /> : <ForgotPassword />} />
+          <Route path="/reset_password" element={token ? <Navigate to='/home' /> : <ResetPassword />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

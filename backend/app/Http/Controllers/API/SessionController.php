@@ -130,7 +130,9 @@ class SessionController extends Controller
 
     public function getSessionBySchoolId ($schoolId){
         try {
-            $records = Session::with('school')->where('SCHOOL_ID', $schoolId)->get();
+            $records = Session::with('school')->where('SCHOOL_ID', $schoolId)
+                ->orderBy('YEAR', 'DESC')
+                ->first()->toArray();
 
             return response()->json($records, 200);
         }

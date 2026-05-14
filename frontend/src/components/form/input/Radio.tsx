@@ -7,6 +7,7 @@ interface RadioProps {
   label: string; // Label for the radio button
   className?: string; // Optional additional classes
   disabled?: boolean; // Optional disabled state
+  checked?: boolean; // Optional checked state
 }
 
 const Radio: React.FC<RadioProps> = ({
@@ -16,11 +17,12 @@ const Radio: React.FC<RadioProps> = ({
   label,
   className = "",
   disabled = false,
+  checked,
 }) => {
   const [field] = useField({ name, type: "radio", value });
 
 
-  const isChecked = field.checked;
+  const isChecked = checked ?? field.checked;
 
   return (
     <div className="">

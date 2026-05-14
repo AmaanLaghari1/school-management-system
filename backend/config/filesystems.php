@@ -60,6 +60,13 @@ return [
             'report' => false,
         ],
 
+        'uploads' => [
+            'driver' => 'local',
+            'root' => base_path('../resource/uploads'), // One level above /backend
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*

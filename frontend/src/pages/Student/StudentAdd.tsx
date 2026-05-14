@@ -69,6 +69,7 @@ const StudentAdd = () => {
         }
         setLoading(false)
     }
+    
     return (
         <div>
             <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">Add New Student</h5>
